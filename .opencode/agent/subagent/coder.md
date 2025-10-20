@@ -1,7 +1,7 @@
 ---
 description: "Implements code according to specifications with security focus"
 mode: subagent
-model: claude-sonnet-4-5
+model: anthropic/claude-sonnet-4-5
 temperature: 0
 tools:
   read: true

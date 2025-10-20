@@ -1,7 +1,7 @@
 ---
 description: "Creates and maintains documentation for features with intelligent placement"
 mode: subagent
-model: claude-haiku-4-5
+model: anthropic/claude-haiku-4-5
 temperature: 0.2
 tools:
   read: true

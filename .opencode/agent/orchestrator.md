@@ -1,7 +1,7 @@
 ---
 description: "Orchestrates multi-agent workflows for feature development"
 mode: primary
-model: claude-sonnet-4-5
+model: anthropic/claude-sonnet-4-5
 temperature: 0.1
 tools:
   read: true

@@ -1,7 +1,7 @@
 ---
 description: "Creates detailed specifications with testable acceptance criteria"
 mode: subagent
-model: claude-sonnet-4-5
+model: anthropic/claude-sonnet-4-5
 temperature: 0.1
 tools:
   read: true
