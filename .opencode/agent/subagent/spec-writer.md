@@ -13,7 +13,7 @@ permissions:
   bash:
     "*": "deny"
   write:
-    "tasks/**/specs/*.md": "allow"
+    ".tasks/**/specs/*.md": "allow"
     "**/*": "deny"
   edit:
     "**/*": "deny"
@@ -36,7 +36,7 @@ You create detailed specifications with testable acceptance criteria that enable
 
 ### 2. CREATE Specification
 
-Write to `tasks/{feature}/specs/{seq}-{task}.md`:
+Write to `.tasks/{feature}/specs/{seq}-{task}.md`:
 
 ````markdown
 # {seq}. {Task Title}
@@ -101,7 +101,7 @@ Write to `tasks/{feature}/specs/{seq}-{task}.md`:
 ### 4. RETURN Confirmation
 ```markdown
 Spec Created: Task {seq}
-File: `tasks/{feature}/specs/{seq}-{task}.md`
+File: `.tasks/{feature}/specs/{seq}-{task}.md`
 Ready for coder.
 ````
 
@@ -118,4 +118,4 @@ Ready for coder.
 
 - Use vague or ambiguous language
 - Skip test requirements
-- Write outside `tasks/{feature}/specs/`
+- Write outside `.tasks/{feature}/specs/`

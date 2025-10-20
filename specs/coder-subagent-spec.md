@@ -69,7 +69,7 @@ For each deliverable in spec:
 4. Confirm readiness for review
 
 ### Phase 6: Completion
-1. Write completion note to `tasks/{feature}/code/completion-log.md`
+1. Write completion note to `.tasks/{feature}/code/completion-log.md`
 2. Return confirmation to orchestrator
 
 ## Implementation Guidelines
@@ -148,7 +148,7 @@ For criteria without automated validation:
 # Completion Log: {Task Title}
 
 ## Task
-**Spec**: `tasks/{feature}/specs/{seq}-{task}.md`
+**Spec**: `.tasks/{feature}/specs/{seq}-{task}.md`
 **Completed**: {timestamp}
 
 ## Deliverables Completed
@@ -253,8 +253,8 @@ Coverage: {percentage}%
 ### Completion Response
 ```markdown
 ## Implementation Complete: {Task Title}
-**Spec**: `tasks/{feature}/specs/{seq}-{task}.md`
-**Completion Log**: `tasks/{feature}/code/completion-log.md`
+**Spec**: `.tasks/{feature}/specs/{seq}-{task}.md`
+**Completion Log**: `.tasks/{feature}/code/completion-log.md`
 
 ### Summary
 {Brief summary of what was implemented}

@@ -13,7 +13,7 @@ permissions:
   bash:
     "*": "deny"
   write:
-    "tasks/**/review/*.md": "allow"
+    ".tasks/**/review/*.md": "allow"
     "**/*": "deny"
   edit:
     "**/*": "deny"
@@ -67,7 +67,7 @@ You perform security audits, quality assessments, and compliance checks. You are
 
 ### 5. GENERATE Report
 
-Write to `tasks/{feature}/review/review-report.md`:
+Write to `.tasks/{feature}/review/review-report.md`:
 
 ````markdown
 # Review Report: {Task}

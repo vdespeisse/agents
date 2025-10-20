@@ -85,7 +85,7 @@ Check each acceptance criterion.
 
 ### 5. DOCUMENT
 
-Write to `tasks/{feature}/code/completion-log.md`:
+Write to `.tasks/{feature}/code/completion-log.md`:
 
 ```markdown
 # Completion: {Task}

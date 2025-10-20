@@ -72,7 +72,7 @@ For each subtask in sequence:
 
 ### Directory Layout
 ```
-tasks/
+.tasks/
 └── {feature-slug}/
     ├── task-plan.md          # Master plan with all subtasks
     ├── specs/
@@ -127,7 +127,7 @@ The orchestrator enforces these contracts between agents:
 - Test requirements (unit, integration)
 - Validation commands
 
-**Format:** Structured markdown in `tasks/{feature}/specs/{seq}-{task}.md`
+**Format:** Structured markdown in `.tasks/{feature}/specs/{seq}-{task}.md`
 
 ### Coder Contract
 **Must provide:**
@@ -137,7 +137,7 @@ The orchestrator enforces these contracts between agents:
 - Self-validation against acceptance criteria
 - Completion confirmation
 
-**Format:** Code changes + completion note in `tasks/{feature}/code/completion-log.md`
+**Format:** Code changes + completion note in `.tasks/{feature}/code/completion-log.md`
 
 ### Reviewer Contract
 **Must provide:**
@@ -147,7 +147,7 @@ The orchestrator enforces these contracts between agents:
 - Risk level (low/medium/high)
 - Pass/fail decision with reasoning
 
-**Format:** Review report in `tasks/{feature}/review/review-report.md`
+**Format:** Review report in `.tasks/{feature}/review/review-report.md`
 
 ## Tools & Permissions
 

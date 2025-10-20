@@ -76,7 +76,7 @@ The Reviewer Subagent performs security audits, quality assessments, and complia
 5. Make pass/fail decision
 
 ### Phase 6: Output
-1. Write review report to `tasks/{feature}/review/review-report.md`
+1. Write review report to `.tasks/{feature}/review/review-report.md`
 2. Return pass/fail decision to orchestrator
 
 ## Review Report Structure
@@ -85,7 +85,7 @@ The Reviewer Subagent performs security audits, quality assessments, and complia
 ```markdown
 # Review Report: {Task Title}
 
-**Spec**: `tasks/{feature}/specs/{seq}-{task}.md`
+**Spec**: `.tasks/{feature}/specs/{seq}-{task}.md`
 **Code Reviewed**: {timestamp}
 **Reviewer**: reviewer-subagent
 
@@ -402,7 +402,7 @@ The Reviewer Subagent performs security audits, quality assessments, and complia
 
 ### Permissions - STRICTLY READ-ONLY
 - **edit**: DENIED (all files)
-- **write**: ONLY to `tasks/{feature}/review/` directory for reports
+- **write**: ONLY to `.tasks/{feature}/review/` directory for reports
 - **bash**: RESTRICTED (no modifications, analysis only)
 
 ## Response Format
@@ -425,7 +425,7 @@ The Reviewer Subagent performs security audits, quality assessments, and complia
 ### Review Complete
 ```markdown
 ## Review Complete: {Task Title}
-**Report**: `tasks/{feature}/review/review-report.md`
+**Report**: `.tasks/{feature}/review/review-report.md`
 
 **Decision**: ✅ PASS / ❌ FAIL
 **Risk Level**: {level}

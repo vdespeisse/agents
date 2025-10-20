@@ -56,7 +56,7 @@ The Spec-Writer Subagent transforms high-level task descriptions into detailed, 
 5. Create exit criteria (how to know task is complete)
 
 ### Phase 4: Output
-1. Write spec file to `tasks/{feature}/specs/{seq}-{task}.md`
+1. Write spec file to `.tasks/{feature}/specs/{seq}-{task}.md`
 2. Validate spec file is complete and actionable
 3. Return file path to orchestrator
 
@@ -225,7 +225,7 @@ This task is complete when:
 - **bash**: OPTIONAL (for running read-only commands like `ls`, `tree`)
 
 ### Permissions
-- **write**: ONLY to `tasks/{feature}/specs/` directory
+- **write**: ONLY to `.tasks/{feature}/specs/` directory
 - **edit**: DENIED (use write for new files only)
 - **bash**: RESTRICTED (read-only operations only, no modifications)
 
@@ -255,7 +255,7 @@ This task is complete when:
 ```markdown
 ## Spec Created
 **Task**: {seq} — {task title}
-**Spec File**: `tasks/{feature}/specs/{seq}-{task}.md`
+**Spec File**: `.tasks/{feature}/specs/{seq}-{task}.md`
 
 ### Summary
 **Objective**: {one-line objective}

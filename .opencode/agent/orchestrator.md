@@ -69,17 +69,17 @@ Awaiting approval...
 1. **Invoke @spec-writer**:
 
    - Pass task description, feature context
-   - Wait for spec file: `tasks/{feature}/specs/{seq}-{task}.md`
+   - Wait for spec file: `.tasks/{feature}/specs/{seq}-{task}.md`
 
 2. **Invoke @coder**:
 
    - Pass spec file path
-   - Wait for completion log: `tasks/{feature}/code/completion-log.md`
+   - Wait for completion log: `.tasks/{feature}/code/completion-log.md`
 
 3. **Invoke @reviewer**:
 
    - Pass spec path and changed files
-   - Wait for review: `tasks/{feature}/review/review-report.md`
+   - Wait for review: `.tasks/{feature}/review/review-report.md`
    - Read decision (PASS/FAIL)
 
 4. **Decision**:
