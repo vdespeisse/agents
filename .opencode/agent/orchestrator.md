@@ -66,25 +66,59 @@ Awaiting approval...
 
 **FOR EACH** subtask in sequence:
 
-1. **Invoke @spec-writer**:
+1. **Invoke spec-writer subagent** using task tool:
 
-   - Pass task description, feature context
+   ```
+   task(
+     subagent_type="subagent/spec-writer",
+     description="Write spec for {subtask}",
+     prompt="Create specification for: {subtask description}
+     
+   Feature context: {feature overview}
+   Task plan location: .tasks/{feature-slug}/task-plan.md
+   
+   Write spec to: .tasks/{feature-slug}/specs/{seq}-{task}.md"
+   )
+   ```
+
    - Wait for spec file: `.tasks/{feature}/specs/{seq}-{task}.md`
 
-2. **Invoke @coder**:
+2. **Invoke coder subagent** using task tool:
 
-   - Pass spec file path
+   ```
+   task(
+     subagent_type="subagent/coder",
+     description="Implement {subtask}",
+     prompt="Implement code according to spec: .tasks/{feature-slug}/specs/{seq}-{task}.md
+   
+   Follow all acceptance criteria and security patterns.
+   Log completion to: .tasks/{feature-slug}/code/completion-log.md"
+   )
+   ```
+
    - Wait for completion log: `.tasks/{feature}/code/completion-log.md`
 
-3. **Invoke @reviewer**:
+3. **Invoke reviewer subagent** using task tool:
 
-   - Pass spec path and changed files
+   ```
+   task(
+     subagent_type="subagent/reviewer",
+     description="Review {subtask} implementation",
+     prompt="Review implementation against spec:
+     
+   Spec: .tasks/{feature-slug}/specs/{seq}-{task}.md
+   Implementation: {files modified/created}
+   
+   Write review to: .tasks/{feature-slug}/review/review-report-{seq}.md"
+   )
+   ```
+
    - Wait for review: `.tasks/{feature}/review/review-report.md`
    - Read decision (PASS/FAIL)
 
 4. **Decision**:
    - PASS → Mark complete, next subtask
-   - FAIL → Send feedback to @coder, retry (max 3x)
+   - FAIL → Send feedback to coder subagent using task tool, retry (max 3x)
 
 **UPDATE** progress after each subtask.
 
