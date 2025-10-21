@@ -54,13 +54,20 @@ For each subtask in sequence:
    - Input: Spec from spec-writer
    - Output: Implemented code meeting spec requirements
    
-3. Route to **reviewer** subagent
+3. Route to **spec-checker** subagent
+   - Input: Spec file + implemented code
+   - Output: Validation report with PASS/FAIL on acceptance criteria
+   - If FAIL → Send feedback to coder, loop back to step 2
+   - If PASS → Proceed to step 4
+   
+4. Route to **reviewer** subagent
    - Input: Implemented code + original spec
    - Output: Review report with security/quality assessment
    
-4. Decision point:
-   - If review passed → Mark subtask complete, proceed to next
-   - If review failed → Send feedback to coder, loop back to step 2
+5. Decision point:
+   - If both spec-checker AND reviewer passed → Mark subtask complete, proceed to next
+   - If spec-checker failed → Send validation failures to coder, loop back to step 2
+   - If reviewer failed → Send review feedback to coder, loop back to step 2
 
 ### Phase 3: Completion
 1. Verify all subtasks completed
@@ -80,6 +87,9 @@ For each subtask in sequence:
     │   └── 02-{task}.md      # Spec for subtask 02
     ├── code/
     │   └── completion-log.md # Code implementation notes
+    ├── validation/
+    │   ├── validation-report-01.md  # Validation results for subtask 01
+    │   └── validation-report-02.md  # Validation results for subtask 02
     └── review/
         └── review-report.md  # Consolidated review findings
 ```
@@ -95,8 +105,8 @@ For each subtask in sequence:
 - **Estimated Duration**: {time estimate}
 
 ## Subtasks
-- [ ] 01 — {subtask-description} → spec-writer → coder → reviewer
-- [ ] 02 — {subtask-description} → spec-writer → coder → reviewer
+- [ ] 01 — {subtask-description} → spec-writer → coder → spec-checker → reviewer
+- [ ] 02 — {subtask-description} → spec-writer → coder → spec-checker → reviewer
 
 ## Dependencies
 - 02 depends on 01
@@ -139,6 +149,16 @@ The orchestrator enforces these contracts between agents:
 
 **Format:** Code changes + completion note in `.tasks/{feature}/code/completion-log.md`
 
+### Spec-Checker Contract
+**Must provide:**
+- Execution of all validation commands from spec
+- PASS/FAIL result for each acceptance criterion
+- Command outputs and exit codes
+- Clear PASS/FAIL decision with reasoning
+- Specific failure details if FAIL
+
+**Format:** Validation report in `.tasks/{feature}/validation/validation-report-{seq}.md`
+
 ### Reviewer Contract
 **Must provide:**
 - Security assessment (vulnerabilities flagged)
@@ -173,7 +193,7 @@ Simple (< 30 min, single file):
   
 Medium (30min - 2hrs, single module):
   - Create lightweight task plan (2-5 subtasks)
-  - Standard workflow (spec → code → review)
+  - Standard workflow (spec → code → validation → review)
   
 Complex (> 2hrs, multiple modules):
   - Create detailed task plan (5+ subtasks)
@@ -193,8 +213,17 @@ coder:
   - Input: Spec file path + task requirements
   - Wait: For implementation completion
 
-reviewer:
+spec-checker:
   - When: Code implementation complete
+  - Input: Spec file path + implemented code
+  - Wait: For validation report
+  
+  Decision:
+    - PASS: Proceed to reviewer
+    - FAIL: Send validation failures to coder, retry
+
+reviewer:
+  - When: Spec-checker validation passes
   - Input: Changed files + spec file path
   - Wait: For review report
   
