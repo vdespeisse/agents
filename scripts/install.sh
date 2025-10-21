@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # OpenCode One-Line Installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/vdespeisse/opencode-setup/main/scripts/install.sh | bash
-# Or: bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/opencode-setup/main/scripts/install.sh)
+# Usage: curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh | bash
+# Or: bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh)
 
 set -e
 
@@ -13,7 +13,7 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-REPO_URL="git@github.com:vdespeisse/opencode-setup.git"
+REPO_URL="git@github.com:vdespeisse/agents.git"
 TEMP_DIR=$(mktemp -d)
 TARGET_DIR="${1:-.}"
 
