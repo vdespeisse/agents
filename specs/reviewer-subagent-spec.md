@@ -39,7 +39,7 @@ The Reviewer Subagent performs security audits, quality assessments, and complia
 ## Workflow Process
 
 ### Phase 1: Context Loading
-1. Receive file paths and spec path from orchestrator
+1. Receive file paths and spec path from spec-driven agent
 2. Read original specification
 3. Read implementation code and tests
 4. Load relevant context files for patterns
@@ -77,7 +77,7 @@ The Reviewer Subagent performs security audits, quality assessments, and complia
 
 ### Phase 6: Output
 1. Write review report to `.tasks/{feature}/review/review-report.md`
-2. Return pass/fail decision to orchestrator
+2. Return pass/fail decision to spec-driven agent
 
 ## Review Report Structure
 
@@ -443,7 +443,7 @@ The Reviewer Subagent performs security audits, quality assessments, and complia
 ## Error Handling
 
 ### Cannot Access Files
-- Report missing file paths to orchestrator
+- Report missing file paths to spec-driven agent
 - Continue with available files
 - Note incomplete review in report
 

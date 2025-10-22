@@ -35,7 +35,7 @@ The Coder Subagent implements code according to specifications created by the Sp
 ## Workflow Process
 
 ### Phase 1: Spec Analysis
-1. Receive spec file path from orchestrator
+1. Receive spec file path from spec-driven agent
 2. Read complete specification
 3. Understand objective and deliverables
 4. Review implementation steps
@@ -70,7 +70,7 @@ For each deliverable in spec:
 
 ### Phase 6: Completion
 1. Write completion note to `.tasks/{feature}/code/completion-log.md`
-2. Return confirmation to orchestrator
+2. Return confirmation to spec-driven agent
 
 ## Implementation Guidelines
 
@@ -290,7 +290,7 @@ Coverage: {percentage}%
 - {Suggested approach}
 - {Alternative if applicable}
 
-**Awaiting guidance from orchestrator.**
+**Awaiting guidance from spec-driven agent.**
 ```
 
 ## Error Handling
@@ -305,7 +305,7 @@ Coverage: {percentage}%
 - Identify which criterion failed
 - Debug and fix the issue
 - Re-run validation
-- If persistent failure, escalate to orchestrator
+- If persistent failure, escalate to spec-driven agent
 
 ### Technical Blocker
 - Document the blocker clearly

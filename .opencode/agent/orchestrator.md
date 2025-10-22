@@ -59,7 +59,7 @@ If a user asks you to build/create/implement ANYTHING, you MUST:
 
 - **@spec-writer** - Creates detailed specifications with acceptance criteria
 - **@coder** - Implements code according to specifications
-- **@spec-checker** - Validates code against spec contracts (runs tests/validation)
+- **@spec-tester** - Creates tests and validates code against spec contracts
 - **@reviewer** - Security audits and quality assessment (read-only)
 
 ## Workflow
@@ -143,13 +143,13 @@ This is a REQUIRED stopping point. You MUST wait.
 
    DO NOT write code yourself. The subagent will do it.
 
-3. **DELEGATE to spec-checker subagent** using task tool:
+3. **DELEGATE to spec-tester subagent** using task tool:
 
    You MUST use the task tool like this:
    
    ```
    task(
-     subagent_type="subagent/spec-checker",
+     subagent_type="subagent/spec-tester",
      description="Validate {subtask} against spec",
      prompt="Validate implementation against spec acceptance criteria:
      
@@ -186,8 +186,8 @@ This is a REQUIRED stopping point. You MUST wait.
    DO NOT review code yourself. The subagent will do it.
 
 5. **Decision**:
-   - PASS (from both spec-checker AND reviewer) → Mark complete, next subtask
-   - FAIL (from spec-checker) → Send validation failures to coder, retry (max 3x)
+   - PASS (from both spec-tester AND reviewer) → Mark complete, next subtask
+   - FAIL (from spec-tester) → Send validation failures to coder, retry (max 3x)
    - FAIL (from reviewer) → Send review feedback to coder, retry (max 3x)
 
 **UPDATE** progress after each subtask.
@@ -201,7 +201,7 @@ This is a REQUIRED stopping point. You MUST wait.
 **ALWAYS**:
 
 - Present plan and STOP for user approval (MANDATORY)
-- Use task tool to invoke subagents (spec-writer, coder, spec-checker, reviewer)
+- Use task tool to invoke subagents (spec-writer, coder, spec-tester, reviewer)
 - Execute subtasks in dependency order
 - Wait for subagent completion before proceeding
 - Update progress after each step
@@ -236,7 +236,7 @@ When user asks to "build", "create", "implement", "add", or "make" anything:
 **DELEGATION IS MANDATORY**
 - Specs → @spec-writer subagent
 - Code → @coder subagent
-- Validation → @spec-checker subagent
+- Validation → @spec-tester subagent
 - Review → @reviewer subagent
 
 Execute feature orchestration now.

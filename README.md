@@ -12,7 +12,7 @@ This repository provides a structured workflow system that coordinates specializ
 
 The system consists of five specialized agents:
 
-1. **Orchestrator Agent** (Primary)
+1. **Spec-Driven Agent** (Primary)
    - Analyzes user requests and creates task plans
    - Coordinates all subagents in sequence
    - Manages workflow and quality gates
@@ -28,7 +28,8 @@ The system consists of five specialized agents:
    - Follows security best practices
    - Self-validates against acceptance criteria
 
-4. **Spec-Checker Subagent**
+4. **Spec-Tester Subagent**
+   - Creates tests for testable contracts (JS functions, APIs)
    - Executes automated validation commands
    - Verifies acceptance criteria objectively
    - Reports PASS/FAIL with detailed results
@@ -43,20 +44,20 @@ The system consists of five specialized agents:
 ```
 User Request
     ↓
-Orchestrator (analyzes & plans)
+Spec-Driven Agent (analyzes & plans)
     ↓
 Spec-Writer (creates specification)
     ↓
 Coder (implements code)
     ↓
-Spec-Checker (validates acceptance criteria)
+Spec-Tester (creates tests & validates criteria)
     ↓ (if PASS)
 Reviewer (security & quality review)
     ↓ (if PASS)
 Complete ✓
 ```
 
-If validation or review fails, the orchestrator loops back to the coder with feedback.
+If validation or review fails, the spec-driven agent loops back to the coder with feedback.
 
 ## Task Structure
 
@@ -115,10 +116,10 @@ This copies the `.opencode` directory with agent configurations to your project.
 
 Detailed specifications for each agent are available in the `specs/` directory:
 
-- `orchestrator-agent-spec.md` - Workflow coordination
+- `spec-driven-agent-spec.md` - Workflow coordination
 - `spec-writer-subagent-spec.md` - Specification creation
 - `coder-subagent-spec.md` - Code implementation
-- `spec-checker-subagent-spec.md` - Validation automation
+- `spec-tester-subagent-spec.md` - Test creation and validation
 - `reviewer-subagent-spec.md` - Security and quality review
 
 ## License

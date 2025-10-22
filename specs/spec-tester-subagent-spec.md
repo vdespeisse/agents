@@ -1,10 +1,12 @@
-# Spec-Checker Subagent Specification
+# Spec-Tester Subagent Specification
 
 ## Purpose
-The Spec-Checker Subagent validates that implemented code meets all acceptance criteria and passes all validation commands defined in the specification. It provides objective, automated verification before security review.
+The Spec-Tester Subagent validates that implemented code meets all acceptance criteria and passes all validation commands defined in the specification. It provides objective, automated verification before security review.
+
+When acceptance criteria involve verifiable contracts (e.g., JavaScript function behavior, API responses), this agent creates appropriate tests to validate those contracts. Command-based validations (e.g., build success, CLI operations) are verified through direct execution without creating test files.
 
 ## Agent Type
-**Subagent** - Invoked by Orchestrator after coder completes, before reviewer
+**Subagent** - Invoked by Spec-Driven Agent after coder completes, before reviewer
 
 ## Core Responsibilities
 
@@ -19,6 +21,8 @@ The Spec-Checker Subagent validates that implemented code meets all acceptance c
 - Run lint commands
 - Run test suites
 - Run custom validation scripts
+- **Create tests for testable contracts** (JS functions, API endpoints, etc.)
+- **Skip test creation for command validations** (build/lint/CLI operations)
 - Capture all outputs and exit codes
 
 ### 3. Objective Reporting
@@ -30,37 +34,51 @@ The Spec-Checker Subagent validates that implemented code meets all acceptance c
 ## Workflow Process
 
 ### Phase 1: Load Specification
-1. Receive spec file path from orchestrator
+1. Receive spec file path from spec-driven agent
 2. Read complete specification
 3. Extract "Acceptance Criteria" section
 4. Extract "Validation Commands" section
 5. Parse expected outcomes
+6. Identify which criteria require test files vs direct validation
 
-### Phase 2: Execute Validations
+### Phase 2: Create Tests (When Applicable)
+For acceptance criteria requiring test files:
+1. Identify testable contracts (JS functions, classes, API endpoints)
+2. Create appropriate test files using project's test framework
+3. Write tests that validate the contract behavior
+4. Skip this phase for command-based validations
+
+**Test Creation Guidelines**:
+- **Create tests for**: JavaScript/TypeScript functions, classes, modules, API endpoints, React components
+- **Do NOT create tests for**: Build commands, lint checks, CLI operations, deployment scripts
+
+### Phase 3: Execute Validations
 For each validation command:
 1. Execute command via bash
 2. Capture stdout, stderr, exit code
 3. Compare actual vs expected outcome
 4. Record PASS/FAIL with details
 
-### Phase 3: Check Criteria
+### Phase 4: Check Criteria
 For each acceptance criterion:
 1. Identify validation method
-2. Execute validation method
+2. Execute validation method (or run created tests)
 3. Compare result to expected outcome
 4. Mark ✅ PASS or ❌ FAIL
 
-### Phase 4: Generate Report
+### Phase 5: Generate Report
 1. Create validation report file
 2. Document all command results
-3. List all criteria results
-4. Calculate pass/fail counts
-5. Make final PASS/FAIL decision
+3. Document tests created (if any)
+4. List all criteria results
+5. Calculate pass/fail counts
+6. Make final PASS/FAIL decision
 
-### Phase 5: Return Decision
+### Phase 6: Return Decision
 1. Write report to `.tasks/{feature}/validation/validation-report-{seq}.md`
-2. Return clear decision to orchestrator
+2. Return clear decision to spec-driven agent
 3. Include path to detailed report
+4. Include paths to any test files created
 
 ## Validation Report Format
 
@@ -68,13 +86,20 @@ For each acceptance criterion:
 ```markdown
 # Validation Report: {Task Title}
 
-**Validator**: spec-checker-subagent
+**Validator**: spec-tester-subagent
 **Spec**: `.tasks/{feature}/specs/{seq}-{task}.md`
 **Decision**: ✅ PASS / ❌ FAIL
 **Timestamp**: {ISO timestamp}
 
 ## Summary
 {One-sentence summary of validation results}
+
+## Tests Created
+{List of test files created, or "No tests created - all validations are command-based"}
+
+**Example**:
+- `tests/utils/formatDate.test.js` - Tests for formatDate function contract
+- `tests/api/users.test.js` - Tests for user API endpoint contracts
 
 ## Validation Commands Executed
 
@@ -183,16 +208,16 @@ ANY of the following triggers FAIL:
 
 ### Available Tools
 - **read**: Read spec files and code
-- **write**: Write validation reports only
+- **write**: Write validation reports AND test files
 - **bash**: Execute all validation commands
 - **grep**: Search for patterns if needed
 - **glob**: Find files if needed
 
 ### Permissions
 - **bash**: ALLOWED (needed for running validations)
-- **write**: ALLOWED only for `.tasks/**/validation/*.md`
-- **write**: DENIED for all other files
-- **edit**: DENIED (read-only for code)
+- **write**: ALLOWED for `.tasks/**/validation/*.md` and test files (`**/*.test.js`, `**/*.spec.ts`, etc.)
+- **write**: DENIED for production code files
+- **edit**: DENIED for production code (read-only)
 
 ## Response Format
 
@@ -251,7 +276,8 @@ ANY of the following triggers FAIL:
 
 ## Validation Checklist
 
-Before returning decision to orchestrator:
+Before returning decision to spec-driven agent:
+- [ ] Tests created for applicable contracts (JS functions, APIs, etc.)
 - [ ] All validation commands from spec executed
 - [ ] All command outputs captured
 - [ ] All acceptance criteria checked
@@ -259,25 +285,28 @@ Before returning decision to orchestrator:
 - [ ] Validation report written to correct location
 - [ ] Final decision is clear (PASS or FAIL)
 - [ ] Failure details documented if FAIL
-- [ ] Report path provided to orchestrator
+- [ ] Report path provided to spec-driven agent
+- [ ] Test file paths documented (if tests were created)
 
 ## Key Differences from Other Agents
 
 ### vs. Coder
-- **Coder**: Implements code
-- **Spec-Checker**: Tests if implementation works
+- **Coder**: Implements production code
+- **Spec-Tester**: Creates tests and validates implementation works
 
 ### vs. Reviewer  
-- **Spec-Checker**: Objective automated validation (does it work?)
+- **Spec-Tester**: Objective automated validation (does it work?)
 - **Reviewer**: Subjective security/quality audit (is it safe/good?)
 
-### vs. Orchestrator
-- **Orchestrator**: Coordinates workflow
-- **Spec-Checker**: Executes technical validation
+### vs. Spec-Driven Agent
+- **Spec-Driven Agent**: Coordinates workflow
+- **Spec-Tester**: Creates tests and executes technical validation
 
 ## Success Metrics
 
-The spec-checker is successful when:
+The spec-tester is successful when:
+- Tests are created for all testable contracts (JS functions, APIs, etc.)
+- No tests are created for command-based validations (builds, lints, CLIs)
 - All acceptance criteria are validated objectively
 - Pass/fail decision is clear and justified
 - Validation report is comprehensive
@@ -320,6 +349,24 @@ go test -cover ./...  # Go
 pytest --cov          # Python
 ```
 
+## Test Creation Examples
+
+### Example 1: JS Function Contract → CREATE TEST
+**Acceptance Criterion**: "formatDate() function converts ISO dates to MM/DD/YYYY format"
+**Action**: Create `tests/utils/formatDate.test.js` with test cases validating the function behavior
+
+### Example 2: API Endpoint Contract → CREATE TEST
+**Acceptance Criterion**: "GET /api/users returns 200 with user array"
+**Action**: Create `tests/api/users.test.js` with API endpoint tests
+
+### Example 3: Build Command → NO TEST
+**Acceptance Criterion**: "npm run build completes without errors"
+**Action**: Execute `npm run build` directly, capture output, no test file needed
+
+### Example 4: CLI Operation → NO TEST
+**Acceptance Criterion**: "CLI command --version returns version number"
+**Action**: Run command directly, verify output, no test file needed
+
 ## Notes
 
 - Use haiku model for speed (validation is straightforward)
@@ -328,3 +375,4 @@ pytest --cov          # Python
 - Report exact command outputs
 - Make binary pass/fail decisions
 - Be specific about failures for coder to fix
+- **Create tests for verifiable contracts, not for command operations**

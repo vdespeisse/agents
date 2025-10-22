@@ -1,7 +1,7 @@
-# Orchestrator Agent Specification
+# Spec-Driven Agent Specification
 
 ## Purpose
-The Orchestrator Agent is the primary entry point for all user requests. It analyzes requests, creates structured task plans, coordinates subagents, and manages the overall workflow from feature request to completion.
+The Spec-Driven Agent is the primary entry point for all user requests. It analyzes requests, creates structured task plans, coordinates subagents, and manages the overall workflow from feature request to completion.
 
 ## Agent Type
 **Primary Agent** - User-facing, coordinates all other agents
@@ -54,7 +54,7 @@ For each subtask in sequence:
    - Input: Spec from spec-writer
    - Output: Implemented code meeting spec requirements
    
-3. Route to **spec-checker** subagent
+3. Route to **spec-tester** subagent
    - Input: Spec file + implemented code
    - Output: Validation report with PASS/FAIL on acceptance criteria
    - If FAIL → Send feedback to coder, loop back to step 2
@@ -65,8 +65,8 @@ For each subtask in sequence:
    - Output: Review report with security/quality assessment
    
 5. Decision point:
-   - If both spec-checker AND reviewer passed → Mark subtask complete, proceed to next
-   - If spec-checker failed → Send validation failures to coder, loop back to step 2
+   - If both spec-tester AND reviewer passed → Mark subtask complete, proceed to next
+   - If spec-tester failed → Send validation failures to coder, loop back to step 2
    - If reviewer failed → Send review feedback to coder, loop back to step 2
 
 ### Phase 3: Completion
@@ -105,8 +105,8 @@ For each subtask in sequence:
 - **Estimated Duration**: {time estimate}
 
 ## Subtasks
-- [ ] 01 — {subtask-description} → spec-writer → coder → spec-checker → reviewer
-- [ ] 02 — {subtask-description} → spec-writer → coder → spec-checker → reviewer
+- [ ] 01 — {subtask-description} → spec-writer → coder → spec-tester → reviewer
+- [ ] 02 — {subtask-description} → spec-writer → coder → spec-tester → reviewer
 
 ## Dependencies
 - 02 depends on 01
@@ -126,7 +126,7 @@ For each subtask in sequence:
 
 ## Acceptance Criteria Contracts
 
-The orchestrator enforces these contracts between agents:
+The spec-driven agent enforces these contracts between agents:
 
 ### Spec-Writer Contract
 **Must provide:**
@@ -149,7 +149,7 @@ The orchestrator enforces these contracts between agents:
 
 **Format:** Code changes + completion note in `.tasks/{feature}/code/completion-log.md`
 
-### Spec-Checker Contract
+### Spec-Tester Contract
 **Must provide:**
 - Execution of all validation commands from spec
 - PASS/FAIL result for each acceptance criterion
@@ -213,7 +213,7 @@ coder:
   - Input: Spec file path + task requirements
   - Wait: For implementation completion
 
-spec-checker:
+spec-tester:
   - When: Code implementation complete
   - Input: Spec file path + implemented code
   - Wait: For validation report
@@ -223,7 +223,7 @@ spec-checker:
     - FAIL: Send validation failures to coder, retry
 
 reviewer:
-  - When: Spec-checker validation passes
+  - When: Spec-tester validation passes
   - Input: Changed files + spec file path
   - Wait: For review report
   
@@ -309,7 +309,7 @@ reviewer:
 
 ## Validation Criteria
 
-Before marking orchestrator complete:
+Before marking spec-driven agent complete:
 - [ ] All subtasks have specs created
 - [ ] All subtasks have code implemented
 - [ ] All subtasks have passed review
@@ -319,7 +319,7 @@ Before marking orchestrator complete:
 
 ## Success Metrics
 
-The orchestrator is successful when:
+The spec-driven agent is successful when:
 - Task plans are clear and actionable
 - Subagents execute without confusion
 - Review feedback loops resolve efficiently

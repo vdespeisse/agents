@@ -35,7 +35,7 @@ The Spec-Writer Subagent transforms high-level task descriptions into detailed, 
 ## Workflow Process
 
 ### Phase 1: Analysis
-1. Receive task description from orchestrator
+1. Receive task description from spec-driven agent
 2. Read task context and requirements
 3. Search codebase for existing patterns
 4. Identify files that will be affected
@@ -58,7 +58,7 @@ The Spec-Writer Subagent transforms high-level task descriptions into detailed, 
 ### Phase 4: Output
 1. Write spec file to `.tasks/{feature}/specs/{seq}-{task}.md`
 2. Validate spec file is complete and actionable
-3. Return file path to orchestrator
+3. Return file path to spec-driven agent
 
 ## Spec File Structure
 
@@ -291,14 +291,14 @@ This task is complete when:
 ## Error Handling
 
 ### Insufficient Context
-- Request more details from orchestrator
+- Request more details from spec-driven agent
 - Identify specific missing information
 - Suggest reasonable defaults if appropriate
 
 ### Conflicting Requirements
 - Flag conflict clearly
 - Present options with tradeoffs
-- Request orchestrator decision
+- Request spec-driven agent decision
 
 ### Technical Uncertainty
 - Research existing patterns in codebase
@@ -307,7 +307,7 @@ This task is complete when:
 
 ## Validation Criteria
 
-Before returning spec to orchestrator:
+Before returning spec to spec-driven agent:
 - [ ] Objective is clear and single-purpose
 - [ ] All deliverables are concrete and specific
 - [ ] Implementation steps are actionable and sequential
