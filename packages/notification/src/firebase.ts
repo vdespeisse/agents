@@ -1,45 +1,15 @@
 import * as admin from 'firebase-admin';
 import { existsSync, readFileSync } from 'fs';
-import { FirebaseConfig, InitializationError } from './types.js';
-
-let firebaseApp: admin.app.App | null = null;
-let initialized = false;
+import { NotificationClientConfig, InitializationError } from './types.js';
 
 /**
- * Check if Firebase has been initialized
- */
-export function isInitialized(): boolean {
-  return initialized;
-}
-
-/**
- * Get the initialized Firebase app instance
- * @throws {InitializationError} If Firebase has not been initialized
- */
-export function getFirebaseApp(): admin.app.App {
-  if (!firebaseApp) {
-    throw new InitializationError('Firebase has not been initialized. Call initializeFirebase() first.');
-  }
-  return firebaseApp;
-}
-
-/**
- * Initialize Firebase Admin SDK with service account credentials
- * @param config - Optional configuration with service account path and app name
+ * Create a Firebase Admin app instance with service account credentials
+ * @param config - Configuration with service account path and optional app name
  * @returns The initialized Firebase app instance
  * @throws {InitializationError} If credentials are missing or invalid
  */
-export function initializeFirebase(config?: FirebaseConfig): admin.app.App {
-  // Return existing app if already initialized (singleton pattern)
-  if (initialized && firebaseApp) {
-    return firebaseApp;
-  }
-
-  // Determine service account path with priority order
-  const serviceAccountPath = 
-    config?.serviceAccountPath || 
-    process.env.FIREBASE_SERVICE_ACCOUNT_PATH || 
-    './firebase-service-account.json';
+export function createFirebaseApp(config: NotificationClientConfig): admin.app.App {
+  const { serviceAccountPath, appName } = config;
 
   // Validate service account file exists
   if (!existsSync(serviceAccountPath)) {
@@ -74,21 +44,17 @@ export function initializeFirebase(config?: FirebaseConfig): admin.app.App {
 
   // Initialize Firebase Admin SDK
   try {
-    const appName = config?.appName || process.env.FIREBASE_APP_NAME || '[DEFAULT]';
+    // Generate unique app name if not provided
+    const finalAppName = appName || `notification-client-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     // Check if app with this name already exists
     try {
-      firebaseApp = admin.app(appName);
-      initialized = true;
-      return firebaseApp;
+      return admin.app(finalAppName);
     } catch {
       // App doesn't exist, create it
-      firebaseApp = admin.initializeApp({
+      return admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
-      }, appName);
-      
-      initialized = true;
-      return firebaseApp;
+      }, finalAppName);
     }
   } catch (error) {
     throw new InitializationError(

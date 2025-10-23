@@ -1,9 +1,12 @@
-import { getFirebaseApp, initializeFirebase, isInitialized } from './firebase.js';
+import * as admin from 'firebase-admin';
+import { createFirebaseApp } from './firebase.js';
 import { 
   NotificationPayload, 
   NotificationOptions, 
   NotificationResult,
-  NotificationError 
+  NotificationError,
+  NotificationClient,
+  NotificationClientConfig
 } from './types.js';
 
 /**
@@ -53,131 +56,168 @@ function validateOptions(options?: NotificationOptions): void {
 }
 
 /**
- * Send a push notification to a device
- * @param deviceToken - The FCM device token
- * @param payload - The notification payload with title, body, and optional data
- * @param options - Optional APNs-specific configuration
- * @returns A promise that resolves to the notification result
+ * Build FCM message with APNs configuration
  */
-export async function sendNotification(
+function buildMessage(
   deviceToken: string,
   payload: NotificationPayload,
   options?: NotificationOptions
-): Promise<NotificationResult> {
-  try {
-    // Validate inputs
-    validateDeviceToken(deviceToken);
-    validatePayload(payload);
-    validateOptions(options);
-
-    // Auto-initialize Firebase if not already initialized
-    if (!isInitialized()) {
-      try {
-        initializeFirebase();
-      } catch (error) {
-        return {
-          success: false,
-          error: `Firebase initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-        };
-      }
-    }
-
-    // Get Firebase app and messaging instance
-    const app = getFirebaseApp();
-    const messaging = app.messaging();
-
-    // Build FCM message with APNs configuration for iOS
-    const message: any = {
-      token: deviceToken,
-      notification: {
-        title: payload.title,
-        body: payload.body,
+): any {
+  const message: any = {
+    token: deviceToken,
+    notification: {
+      title: payload.title,
+      body: payload.body,
+    },
+    apns: {
+      headers: {
+        'apns-priority': options?.priority === 'normal' ? '5' : '10',
       },
-      apns: {
-        headers: {
-          'apns-priority': options?.priority === 'normal' ? '5' : '10',
-        },
-        payload: {
-          aps: {
-            alert: {
-              title: payload.title,
-              body: payload.body,
-            },
-            ...(options?.badge !== undefined && { badge: options.badge }),
-            ...(options?.sound && { sound: options.sound }),
-            ...(options?.contentAvailable && { 'content-available': 1 }),
-            ...(options?.mutableContent && { 'mutable-content': 1 }),
+      payload: {
+        aps: {
+          alert: {
+            title: payload.title,
+            body: payload.body,
           },
+          ...(options?.badge !== undefined && { badge: options.badge }),
+          ...(options?.sound && { sound: options.sound }),
+          ...(options?.contentAvailable && { 'content-available': 1 }),
+          ...(options?.mutableContent && { 'mutable-content': 1 }),
         },
       },
-    };
+    },
+  };
 
-    // Add custom data if provided
-    if (payload.data) {
-      message.data = payload.data;
-    }
-
-    // Send the notification
-    const messageId = await messaging.send(message);
-
-    return {
-      success: true,
-      messageId,
-    };
-  } catch (error: any) {
-    // Handle Firebase-specific errors
-    if (error.code) {
-      const errorCode = error.code;
-      let errorMessage = error.message;
-
-      // Map common Firebase error codes to user-friendly messages
-      switch (errorCode) {
-        case 'messaging/invalid-registration-token':
-        case 'messaging/registration-token-not-registered':
-          errorMessage = 'Invalid or unregistered device token';
-          break;
-        case 'messaging/invalid-argument':
-          errorMessage = 'Invalid notification payload or options';
-          break;
-        case 'messaging/authentication-error':
-          errorMessage = 'Firebase authentication failed';
-          break;
-        case 'messaging/server-unavailable':
-          errorMessage = 'Firebase messaging service is temporarily unavailable';
-          break;
-        case 'messaging/internal-error':
-          errorMessage = 'Internal Firebase error occurred';
-          break;
-      }
-
-      console.error(`Notification send failed [${errorCode}]:`, errorMessage);
-      
-      return {
-        success: false,
-        error: errorMessage,
-      };
-    }
-
-    // Handle validation errors
-    if (error instanceof NotificationError) {
-      console.error('Notification validation failed:', error.message);
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-
-    // Handle unknown errors
-    console.error('Notification send failed:', error.message || 'Unknown error');
-    return {
-      success: false,
-      error: error.message || 'Failed to send notification',
-    };
+  // Add custom data if provided
+  if (payload.data) {
+    message.data = payload.data;
   }
+
+  return message;
 }
 
-// Export Firebase initialization for manual control
-export { initializeFirebase } from './firebase.js';
+/**
+ * Handle Firebase messaging errors
+ */
+function handleFirebaseError(error: any): NotificationResult {
+  if (error.code) {
+    const errorCode = error.code;
+    let errorMessage = error.message;
+
+    // Map common Firebase error codes to user-friendly messages
+    switch (errorCode) {
+      case 'messaging/invalid-registration-token':
+      case 'messaging/registration-token-not-registered':
+        errorMessage = 'Invalid or unregistered device token';
+        break;
+      case 'messaging/invalid-argument':
+        errorMessage = 'Invalid notification payload or options';
+        break;
+      case 'messaging/authentication-error':
+        errorMessage = 'Firebase authentication failed';
+        break;
+      case 'messaging/server-unavailable':
+        errorMessage = 'Firebase messaging service is temporarily unavailable';
+        break;
+      case 'messaging/internal-error':
+        errorMessage = 'Internal Firebase error occurred';
+        break;
+    }
+
+    console.error(`Notification send failed [${errorCode}]:`, errorMessage);
+    
+    return {
+      success: false,
+      error: errorMessage,
+    };
+  }
+
+  // Handle validation errors
+  if (error instanceof NotificationError) {
+    console.error('Notification validation failed:', error.message);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+
+  // Handle unknown errors
+  console.error('Notification send failed:', error.message || 'Unknown error');
+  return {
+    success: false,
+    error: error.message || 'Failed to send notification',
+  };
+}
+
+/**
+ * Create a notification client instance
+ * @param serviceAccountPath - Path to Firebase service account JSON file
+ * @param appName - Optional custom app name for Firebase instance
+ * @returns A notification client with sendNotification method
+ * @throws {InitializationError} If credentials are missing or invalid
+ * 
+ * @example
+ * ```typescript
+ * const client = notificationClient('/path/to/service-account.json');
+ * const result = await client.sendNotification('device-token', {
+ *   title: 'Hello',
+ *   body: 'World'
+ * });
+ * ```
+ * 
+ * @example
+ * ```typescript
+ * // Destructure for convenience
+ * const { sendNotification } = notificationClient('/path/to/service-account.json');
+ * const result = await sendNotification('device-token', {
+ *   title: 'Hello',
+ *   body: 'World'
+ * });
+ * ```
+ */
+export function notificationClient(
+  serviceAccountPath: string,
+  appName?: string
+): NotificationClient {
+  // Create Firebase app instance
+  const app = createFirebaseApp({ serviceAccountPath, appName });
+  const messaging = app.messaging();
+
+  /**
+   * Send a push notification to a device
+   * @param deviceToken - The FCM device token
+   * @param payload - The notification payload with title, body, and optional data
+   * @param options - Optional APNs-specific configuration
+   * @returns A promise that resolves to the notification result
+   */
+  async function sendNotification(
+    deviceToken: string,
+    payload: NotificationPayload,
+    options?: NotificationOptions
+  ): Promise<NotificationResult> {
+    try {
+      // Validate inputs
+      validateDeviceToken(deviceToken);
+      validatePayload(payload);
+      validateOptions(options);
+
+      // Build and send message
+      const message = buildMessage(deviceToken, payload, options);
+      const messageId = await messaging.send(message);
+
+      return {
+        success: true,
+        messageId,
+      };
+    } catch (error: any) {
+      return handleFirebaseError(error);
+    }
+  }
+
+  return {
+    sendNotification,
+  };
+}
 
 // Export all types
 export * from './types.js';

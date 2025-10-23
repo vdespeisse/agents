@@ -32,8 +32,7 @@ var index_exports = {};
 __export(index_exports, {
   InitializationError: () => InitializationError,
   NotificationError: () => NotificationError,
-  initializeFirebase: () => initializeFirebase,
-  sendNotification: () => sendNotification
+  notificationClient: () => notificationClient
 });
 module.exports = __toCommonJS(index_exports);
 
@@ -58,22 +57,8 @@ var InitializationError = class extends Error {
 };
 
 // src/firebase.ts
-var firebaseApp = null;
-var initialized = false;
-function isInitialized() {
-  return initialized;
-}
-function getFirebaseApp() {
-  if (!firebaseApp) {
-    throw new InitializationError("Firebase has not been initialized. Call initializeFirebase() first.");
-  }
-  return firebaseApp;
-}
-function initializeFirebase(config) {
-  if (initialized && firebaseApp) {
-    return firebaseApp;
-  }
-  const serviceAccountPath = config?.serviceAccountPath || process.env.FIREBASE_SERVICE_ACCOUNT_PATH || "./firebase-service-account.json";
+function createFirebaseApp(config) {
+  const { serviceAccountPath, appName } = config;
   if (!(0, import_fs.existsSync)(serviceAccountPath)) {
     throw new InitializationError(
       `Service account file not found at path: ${serviceAccountPath}`,
@@ -99,17 +84,13 @@ function initializeFirebase(config) {
     );
   }
   try {
-    const appName = config?.appName || process.env.FIREBASE_APP_NAME || "[DEFAULT]";
+    const finalAppName = appName || `notification-client-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     try {
-      firebaseApp = admin.app(appName);
-      initialized = true;
-      return firebaseApp;
+      return admin.app(finalAppName);
     } catch {
-      firebaseApp = admin.initializeApp({
+      return admin.initializeApp({
         credential: admin.credential.cert(serviceAccount)
-      }, appName);
-      initialized = true;
-      return firebaseApp;
+      }, finalAppName);
     }
   } catch (error) {
     throw new InitializationError(
@@ -149,101 +130,102 @@ function validateOptions(options) {
     throw new NotificationError('Priority must be either "high" or "normal"', "INVALID_OPTIONS");
   }
 }
-async function sendNotification(deviceToken, payload, options) {
-  try {
-    validateDeviceToken(deviceToken);
-    validatePayload(payload);
-    validateOptions(options);
-    if (!isInitialized()) {
-      try {
-        initializeFirebase();
-      } catch (error) {
-        return {
-          success: false,
-          error: `Firebase initialization failed: ${error instanceof Error ? error.message : "Unknown error"}`
-        };
-      }
-    }
-    const app2 = getFirebaseApp();
-    const messaging = app2.messaging();
-    const message = {
-      token: deviceToken,
-      notification: {
-        title: payload.title,
-        body: payload.body
+function buildMessage(deviceToken, payload, options) {
+  const message = {
+    token: deviceToken,
+    notification: {
+      title: payload.title,
+      body: payload.body
+    },
+    apns: {
+      headers: {
+        "apns-priority": options?.priority === "normal" ? "5" : "10"
       },
-      apns: {
-        headers: {
-          "apns-priority": options?.priority === "normal" ? "5" : "10"
-        },
-        payload: {
-          aps: {
-            alert: {
-              title: payload.title,
-              body: payload.body
-            },
-            ...options?.badge !== void 0 && { badge: options.badge },
-            ...options?.sound && { sound: options.sound },
-            ...options?.contentAvailable && { "content-available": 1 },
-            ...options?.mutableContent && { "mutable-content": 1 }
-          }
+      payload: {
+        aps: {
+          alert: {
+            title: payload.title,
+            body: payload.body
+          },
+          ...options?.badge !== void 0 && { badge: options.badge },
+          ...options?.sound && { sound: options.sound },
+          ...options?.contentAvailable && { "content-available": 1 },
+          ...options?.mutableContent && { "mutable-content": 1 }
         }
       }
-    };
-    if (payload.data) {
-      message.data = payload.data;
     }
-    const messageId = await messaging.send(message);
-    return {
-      success: true,
-      messageId
-    };
-  } catch (error) {
-    if (error.code) {
-      const errorCode = error.code;
-      let errorMessage = error.message;
-      switch (errorCode) {
-        case "messaging/invalid-registration-token":
-        case "messaging/registration-token-not-registered":
-          errorMessage = "Invalid or unregistered device token";
-          break;
-        case "messaging/invalid-argument":
-          errorMessage = "Invalid notification payload or options";
-          break;
-        case "messaging/authentication-error":
-          errorMessage = "Firebase authentication failed";
-          break;
-        case "messaging/server-unavailable":
-          errorMessage = "Firebase messaging service is temporarily unavailable";
-          break;
-        case "messaging/internal-error":
-          errorMessage = "Internal Firebase error occurred";
-          break;
-      }
-      console.error(`Notification send failed [${errorCode}]:`, errorMessage);
-      return {
-        success: false,
-        error: errorMessage
-      };
+  };
+  if (payload.data) {
+    message.data = payload.data;
+  }
+  return message;
+}
+function handleFirebaseError(error) {
+  if (error.code) {
+    const errorCode = error.code;
+    let errorMessage = error.message;
+    switch (errorCode) {
+      case "messaging/invalid-registration-token":
+      case "messaging/registration-token-not-registered":
+        errorMessage = "Invalid or unregistered device token";
+        break;
+      case "messaging/invalid-argument":
+        errorMessage = "Invalid notification payload or options";
+        break;
+      case "messaging/authentication-error":
+        errorMessage = "Firebase authentication failed";
+        break;
+      case "messaging/server-unavailable":
+        errorMessage = "Firebase messaging service is temporarily unavailable";
+        break;
+      case "messaging/internal-error":
+        errorMessage = "Internal Firebase error occurred";
+        break;
     }
-    if (error instanceof NotificationError) {
-      console.error("Notification validation failed:", error.message);
-      return {
-        success: false,
-        error: error.message
-      };
-    }
-    console.error("Notification send failed:", error.message || "Unknown error");
+    console.error(`Notification send failed [${errorCode}]:`, errorMessage);
     return {
       success: false,
-      error: error.message || "Failed to send notification"
+      error: errorMessage
     };
   }
+  if (error instanceof NotificationError) {
+    console.error("Notification validation failed:", error.message);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+  console.error("Notification send failed:", error.message || "Unknown error");
+  return {
+    success: false,
+    error: error.message || "Failed to send notification"
+  };
+}
+function notificationClient(serviceAccountPath, appName) {
+  const app2 = createFirebaseApp({ serviceAccountPath, appName });
+  const messaging = app2.messaging();
+  async function sendNotification(deviceToken, payload, options) {
+    try {
+      validateDeviceToken(deviceToken);
+      validatePayload(payload);
+      validateOptions(options);
+      const message = buildMessage(deviceToken, payload, options);
+      const messageId = await messaging.send(message);
+      return {
+        success: true,
+        messageId
+      };
+    } catch (error) {
+      return handleFirebaseError(error);
+    }
+  }
+  return {
+    sendNotification
+  };
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   InitializationError,
   NotificationError,
-  initializeFirebase,
-  sendNotification
+  notificationClient
 });

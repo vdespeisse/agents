@@ -1,5 +1,3 @@
-import * as admin from 'firebase-admin';
-
 interface NotificationPayload {
     title: string;
     body: string;
@@ -17,9 +15,12 @@ interface NotificationResult {
     messageId?: string;
     error?: string;
 }
-interface FirebaseConfig {
-    serviceAccountPath?: string;
+interface NotificationClientConfig {
+    serviceAccountPath: string;
     appName?: string;
+}
+interface NotificationClient {
+    sendNotification: (deviceToken: string, payload: NotificationPayload, options?: NotificationOptions) => Promise<NotificationResult>;
 }
 declare class NotificationError extends Error {
     code?: string | undefined;
@@ -31,20 +32,31 @@ declare class InitializationError extends Error {
 }
 
 /**
- * Initialize Firebase Admin SDK with service account credentials
- * @param config - Optional configuration with service account path and app name
- * @returns The initialized Firebase app instance
+ * Create a notification client instance
+ * @param serviceAccountPath - Path to Firebase service account JSON file
+ * @param appName - Optional custom app name for Firebase instance
+ * @returns A notification client with sendNotification method
  * @throws {InitializationError} If credentials are missing or invalid
+ *
+ * @example
+ * ```typescript
+ * const client = notificationClient('/path/to/service-account.json');
+ * const result = await client.sendNotification('device-token', {
+ *   title: 'Hello',
+ *   body: 'World'
+ * });
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Destructure for convenience
+ * const { sendNotification } = notificationClient('/path/to/service-account.json');
+ * const result = await sendNotification('device-token', {
+ *   title: 'Hello',
+ *   body: 'World'
+ * });
+ * ```
  */
-declare function initializeFirebase(config?: FirebaseConfig): admin.app.App;
+declare function notificationClient(serviceAccountPath: string, appName?: string): NotificationClient;
 
-/**
- * Send a push notification to a device
- * @param deviceToken - The FCM device token
- * @param payload - The notification payload with title, body, and optional data
- * @param options - Optional APNs-specific configuration
- * @returns A promise that resolves to the notification result
- */
-declare function sendNotification(deviceToken: string, payload: NotificationPayload, options?: NotificationOptions): Promise<NotificationResult>;
-
-export { type FirebaseConfig, InitializationError, NotificationError, type NotificationOptions, type NotificationPayload, type NotificationResult, initializeFirebase, sendNotification };
+export { InitializationError, type NotificationClient, type NotificationClientConfig, NotificationError, type NotificationOptions, type NotificationPayload, type NotificationResult, notificationClient };

@@ -62,10 +62,11 @@ describe('Notification Sending', () => {
   describe('successful notification send', () => {
     it('should send notification successfully', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       
       // Act
-      const result = await sendNotification(validDeviceToken, validPayload);
+      const result = await client.sendNotification(validDeviceToken, validPayload);
 
       // Assert
       expect(result.success).toBe(true);
@@ -76,7 +77,8 @@ describe('Notification Sending', () => {
 
     it('should send notification with custom data', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       const payloadWithData: NotificationPayload = {
         ...validPayload,
         data: {
@@ -86,7 +88,7 @@ describe('Notification Sending', () => {
       };
 
       // Act
-      const result = await sendNotification(validDeviceToken, payloadWithData);
+      const result = await client.sendNotification(validDeviceToken, payloadWithData);
 
       // Assert
       expect(result.success).toBe(true);
@@ -102,7 +104,8 @@ describe('Notification Sending', () => {
 
     it('should send notification with options', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       const options: NotificationOptions = {
         badge: 5,
         sound: 'default',
@@ -112,7 +115,7 @@ describe('Notification Sending', () => {
       };
 
       // Act
-      const result = await sendNotification(validDeviceToken, validPayload, options);
+      const result = await client.sendNotification(validDeviceToken, validPayload, options);
 
       // Assert
       expect(result.success).toBe(true);
@@ -137,13 +140,14 @@ describe('Notification Sending', () => {
 
     it('should use normal priority when specified', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       const options: NotificationOptions = {
         priority: 'normal',
       };
 
       // Act
-      const result = await sendNotification(validDeviceToken, validPayload, options);
+      const result = await client.sendNotification(validDeviceToken, validPayload, options);
 
       // Assert
       expect(result.success).toBe(true);
@@ -158,35 +162,28 @@ describe('Notification Sending', () => {
       );
     });
 
-    it('should auto-initialize Firebase on first send', async () => {
-      // Need fresh module state
-      vi.resetModules();
-      
+    it('should support destructured sendNotification', async () => {
       // Arrange
-      const { existsSync, readFileSync } = await import('fs');
-      const { sendNotification } = await import('../src/index');
-      
-      vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(readFileSync).mockReturnValue(JSON.stringify(mockServiceAccount));
-      mockSend.mockResolvedValue('projects/test-project/messages/msg-123');
+      const { notificationClient } = await import('../src/index');
+      const { sendNotification } = notificationClient('./test-service-account.json');
       
       // Act
       const result = await sendNotification(validDeviceToken, validPayload);
 
       // Assert
       expect(result.success).toBe(true);
-      expect(existsSync).toHaveBeenCalled();
-      expect(readFileSync).toHaveBeenCalled();
+      expect(result.messageId).toBe('projects/test-project/messages/msg-123');
     });
   });
 
   describe('invalid device token', () => {
     it('should return error for empty device token', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       
       // Act
-      const result = await sendNotification('', validPayload);
+      const result = await client.sendNotification('', validPayload);
 
       // Assert
       expect(result.success).toBe(false);
@@ -196,10 +193,11 @@ describe('Notification Sending', () => {
 
     it('should return error for whitespace-only device token', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       
       // Act
-      const result = await sendNotification('   ', validPayload);
+      const result = await client.sendNotification('   ', validPayload);
 
       // Assert
       expect(result.success).toBe(false);
@@ -209,14 +207,15 @@ describe('Notification Sending', () => {
 
     it('should handle Firebase invalid token error', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       mockSend.mockRejectedValue({
         code: 'messaging/invalid-registration-token',
         message: 'Invalid registration token',
       });
 
       // Act
-      const result = await sendNotification(validDeviceToken, validPayload);
+      const result = await client.sendNotification(validDeviceToken, validPayload);
 
       // Assert
       expect(result.success).toBe(false);
@@ -225,14 +224,15 @@ describe('Notification Sending', () => {
 
     it('should handle Firebase unregistered token error', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       mockSend.mockRejectedValue({
         code: 'messaging/registration-token-not-registered',
         message: 'Token not registered',
       });
 
       // Act
-      const result = await sendNotification(validDeviceToken, validPayload);
+      const result = await client.sendNotification(validDeviceToken, validPayload);
 
       // Assert
       expect(result.success).toBe(false);
@@ -243,14 +243,15 @@ describe('Notification Sending', () => {
   describe('invalid payload', () => {
     it('should return error for missing title', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       const invalidPayload = {
         title: '',
         body: 'Test body',
       };
 
       // Act
-      const result = await sendNotification(validDeviceToken, invalidPayload);
+      const result = await client.sendNotification(validDeviceToken, invalidPayload);
 
       // Assert
       expect(result.success).toBe(false);
@@ -260,14 +261,15 @@ describe('Notification Sending', () => {
 
     it('should return error for missing body', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       const invalidPayload = {
         title: 'Test title',
         body: '',
       };
 
       // Act
-      const result = await sendNotification(validDeviceToken, invalidPayload);
+      const result = await client.sendNotification(validDeviceToken, invalidPayload);
 
       // Assert
       expect(result.success).toBe(false);
@@ -277,14 +279,15 @@ describe('Notification Sending', () => {
 
     it('should return error for payload exceeding size limit', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       const largePayload: NotificationPayload = {
         title: 'Test',
         body: 'x'.repeat(5000), // Exceeds 4KB limit
       };
 
       // Act
-      const result = await sendNotification(validDeviceToken, largePayload);
+      const result = await client.sendNotification(validDeviceToken, largePayload);
 
       // Assert
       expect(result.success).toBe(false);
@@ -296,13 +299,14 @@ describe('Notification Sending', () => {
   describe('invalid options', () => {
     it('should return error for negative badge', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       const invalidOptions: NotificationOptions = {
         badge: -1,
       };
 
       // Act
-      const result = await sendNotification(validDeviceToken, validPayload, invalidOptions);
+      const result = await client.sendNotification(validDeviceToken, validPayload, invalidOptions);
 
       // Assert
       expect(result.success).toBe(false);
@@ -312,13 +316,14 @@ describe('Notification Sending', () => {
 
     it('should return error for invalid priority', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       const invalidOptions: any = {
         priority: 'invalid',
       };
 
       // Act
-      const result = await sendNotification(validDeviceToken, validPayload, invalidOptions);
+      const result = await client.sendNotification(validDeviceToken, validPayload, invalidOptions);
 
       // Assert
       expect(result.success).toBe(false);
@@ -330,14 +335,15 @@ describe('Notification Sending', () => {
   describe('Firebase errors', () => {
     it('should handle authentication error', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       mockSend.mockRejectedValue({
         code: 'messaging/authentication-error',
         message: 'Auth failed',
       });
 
       // Act
-      const result = await sendNotification(validDeviceToken, validPayload);
+      const result = await client.sendNotification(validDeviceToken, validPayload);
 
       // Assert
       expect(result.success).toBe(false);
@@ -346,14 +352,15 @@ describe('Notification Sending', () => {
 
     it('should handle server unavailable error', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       mockSend.mockRejectedValue({
         code: 'messaging/server-unavailable',
         message: 'Server unavailable',
       });
 
       // Act
-      const result = await sendNotification(validDeviceToken, validPayload);
+      const result = await client.sendNotification(validDeviceToken, validPayload);
 
       // Assert
       expect(result.success).toBe(false);
@@ -362,14 +369,15 @@ describe('Notification Sending', () => {
 
     it('should handle internal error', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       mockSend.mockRejectedValue({
         code: 'messaging/internal-error',
         message: 'Internal error',
       });
 
       // Act
-      const result = await sendNotification(validDeviceToken, validPayload);
+      const result = await client.sendNotification(validDeviceToken, validPayload);
 
       // Assert
       expect(result.success).toBe(false);
@@ -378,14 +386,15 @@ describe('Notification Sending', () => {
 
     it('should handle invalid argument error', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       mockSend.mockRejectedValue({
         code: 'messaging/invalid-argument',
         message: 'Invalid argument',
       });
 
       // Act
-      const result = await sendNotification(validDeviceToken, validPayload);
+      const result = await client.sendNotification(validDeviceToken, validPayload);
 
       // Assert
       expect(result.success).toBe(false);
@@ -394,14 +403,15 @@ describe('Notification Sending', () => {
 
     it('should handle unknown Firebase error', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       mockSend.mockRejectedValue({
         code: 'messaging/unknown-error',
         message: 'Unknown error occurred',
       });
 
       // Act
-      const result = await sendNotification(validDeviceToken, validPayload);
+      const result = await client.sendNotification(validDeviceToken, validPayload);
 
       // Assert
       expect(result.success).toBe(false);
@@ -410,11 +420,12 @@ describe('Notification Sending', () => {
 
     it('should handle network error', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       mockSend.mockRejectedValue(new Error('Network timeout'));
 
       // Act
-      const result = await sendNotification(validDeviceToken, validPayload);
+      const result = await client.sendNotification(validDeviceToken, validPayload);
 
       // Assert
       expect(result.success).toBe(false);
@@ -425,14 +436,15 @@ describe('Notification Sending', () => {
   describe('edge cases', () => {
     it('should handle special characters in notification text', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       const specialPayload: NotificationPayload = {
         title: 'Test 🎉 Title',
         body: 'Body with émojis and spëcial çharacters',
       };
 
       // Act
-      const result = await sendNotification(validDeviceToken, specialPayload);
+      const result = await client.sendNotification(validDeviceToken, specialPayload);
 
       // Assert
       expect(result.success).toBe(true);
@@ -440,14 +452,15 @@ describe('Notification Sending', () => {
 
     it('should handle notification with only required fields', async () => {
       // Arrange
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const client = notificationClient('./test-service-account.json');
       const minimalPayload: NotificationPayload = {
         title: 'Title',
         body: 'Body',
       };
 
       // Act
-      const result = await sendNotification(validDeviceToken, minimalPayload);
+      const result = await client.sendNotification(validDeviceToken, minimalPayload);
 
       // Assert
       expect(result.success).toBe(true);
@@ -461,23 +474,39 @@ describe('Notification Sending', () => {
       );
     });
 
-    it('should handle Firebase initialization failure gracefully', async () => {
+    it('should handle client creation failure gracefully', async () => {
       // Need fresh module state
       vi.resetModules();
       
       // Arrange
       const { existsSync } = await import('fs');
-      const { sendNotification } = await import('../src/index');
+      const { notificationClient } = await import('../src/index');
+      const { InitializationError } = await import('../src/types');
       
       vi.mocked(existsSync).mockReturnValue(false);
 
+      // Act & Assert
+      expect(() => {
+        notificationClient('./missing.json');
+      }).toThrow(InitializationError);
+    });
+  });
+
+  describe('multiple clients', () => {
+    it('should allow multiple independent clients', async () => {
+      // Arrange
+      const { notificationClient } = await import('../src/index');
+      const client1 = notificationClient('./service-account-1.json');
+      const client2 = notificationClient('./service-account-2.json');
+
       // Act
-      const result = await sendNotification(validDeviceToken, validPayload);
+      const result1 = await client1.sendNotification(validDeviceToken, validPayload);
+      const result2 = await client2.sendNotification(validDeviceToken, validPayload);
 
       // Assert
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('Firebase initialization failed');
-      expect(mockSend).not.toHaveBeenCalled();
+      expect(result1.success).toBe(true);
+      expect(result2.success).toBe(true);
+      expect(mockSend).toHaveBeenCalledTimes(2);
     });
   });
 });

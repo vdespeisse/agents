@@ -18,9 +18,17 @@ export interface NotificationResult {
   error?: string;
 }
 
-export interface FirebaseConfig {
-  serviceAccountPath?: string;
+export interface NotificationClientConfig {
+  serviceAccountPath: string;
   appName?: string;
+}
+
+export interface NotificationClient {
+  sendNotification: (
+    deviceToken: string,
+    payload: NotificationPayload,
+    options?: NotificationOptions
+  ) => Promise<NotificationResult>;
 }
 
 export class NotificationError extends Error {

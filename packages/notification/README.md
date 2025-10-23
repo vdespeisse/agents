@@ -16,24 +16,18 @@ npm install @opencode-setup/notification
    - Click "Generate New Private Key"
    - Save the JSON file securely (DO NOT commit to version control)
 
-## Environment Setup
-
-Set the path to your Firebase service account JSON file:
-
-```bash
-export FIREBASE_SERVICE_ACCOUNT_PATH=/path/to/firebase-service-account.json
-```
-
-Or place the file at the default location: `./firebase-service-account.json` (relative to your project root)
-
 ## Basic Usage
 
-### Send a Simple Notification
+### Create a Notification Client
 
 ```typescript
-import { sendNotification } from '@opencode-setup/notification';
+import { notificationClient } from '@opencode-setup/notification';
 
-const result = await sendNotification(
+// Create a client with your service account path
+const client = notificationClient('/path/to/firebase-service-account.json');
+
+// Send a notification
+const result = await client.sendNotification(
   'device-token-here',
   {
     title: 'Hello!',
@@ -48,10 +42,24 @@ if (result.success) {
 }
 ```
 
+### Destructured API (Recommended)
+
+```typescript
+import { notificationClient } from '@opencode-setup/notification';
+
+// Destructure for convenience
+const { sendNotification } = notificationClient('/path/to/service-account.json');
+
+const result = await sendNotification('device-token', {
+  title: 'Hello',
+  body: 'World',
+});
+```
+
 ### Send Notification with Custom Data
 
 ```typescript
-import { sendNotification } from '@opencode-setup/notification';
+const { sendNotification } = notificationClient('/path/to/service-account.json');
 
 const result = await sendNotification(
   'device-token-here',
@@ -70,7 +78,9 @@ const result = await sendNotification(
 ### Send Notification with Options
 
 ```typescript
-import { sendNotification, NotificationOptions } from '@opencode-setup/notification';
+import { notificationClient, NotificationOptions } from '@opencode-setup/notification';
+
+const { sendNotification } = notificationClient('/path/to/service-account.json');
 
 const options: NotificationOptions = {
   badge: 5,              // Badge count on app icon
@@ -90,24 +100,22 @@ const result = await sendNotification(
 );
 ```
 
-## Manual Initialization
+## Multiple Clients
 
-By default, Firebase is auto-initialized on the first notification send. For more control, you can manually initialize:
+You can create multiple independent notification clients for different Firebase projects:
 
 ```typescript
-import { initializeFirebase, sendNotification } from '@opencode-setup/notification';
+import { notificationClient } from '@opencode-setup/notification';
 
-// Initialize with custom path
-initializeFirebase({
-  serviceAccountPath: '/custom/path/to/service-account.json',
-  appName: 'my-custom-app',
-});
+// Client for production
+const prodClient = notificationClient('/path/to/prod-service-account.json', 'prod-app');
 
-// Now send notifications
-const result = await sendNotification('device-token', {
-  title: 'Hello',
-  body: 'World',
-});
+// Client for staging
+const stagingClient = notificationClient('/path/to/staging-service-account.json', 'staging-app');
+
+// Use them independently
+await prodClient.sendNotification('token', { title: 'Prod', body: 'Message' });
+await stagingClient.sendNotification('token', { title: 'Staging', body: 'Message' });
 ```
 
 ## Error Handling
@@ -115,8 +123,9 @@ const result = await sendNotification('device-token', {
 The package provides comprehensive error handling:
 
 ```typescript
-import { sendNotification } from '@opencode-setup/notification';
+import { notificationClient } from '@opencode-setup/notification';
 
+const { sendNotification } = notificationClient('/path/to/service-account.json');
 const result = await sendNotification(deviceToken, payload);
 
 if (!result.success) {
@@ -137,17 +146,15 @@ if (!result.success) {
 }
 ```
 
-### Error Types
+### Initialization Errors
 
-The package exports custom error classes for initialization errors:
+The package throws `InitializationError` when client creation fails:
 
 ```typescript
-import { initializeFirebase, InitializationError } from '@opencode-setup/notification';
+import { notificationClient, InitializationError } from '@opencode-setup/notification';
 
 try {
-  initializeFirebase({
-    serviceAccountPath: '/invalid/path.json',
-  });
+  const client = notificationClient('/invalid/path.json');
 } catch (error) {
   if (error instanceof InitializationError) {
     console.error('Init failed:', error.message);
@@ -165,7 +172,8 @@ import {
   NotificationPayload,
   NotificationOptions,
   NotificationResult,
-  FirebaseConfig,
+  NotificationClient,
+  NotificationClientConfig,
   NotificationError,
   InitializationError,
 } from '@opencode-setup/notification';
@@ -206,13 +214,18 @@ Restrict access to your service account file:
 chmod 600 /path/to/firebase-service-account.json
 ```
 
-### 3. Environment Variables
+### 3. Secure Path Management
 
-Use environment variables in production:
+Store service account paths securely:
 
-```bash
-# .env file (also add to .gitignore)
-FIREBASE_SERVICE_ACCOUNT_PATH=/secure/path/to/service-account.json
+```typescript
+// Use environment variables
+const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+if (!serviceAccountPath) {
+  throw new Error('FIREBASE_SERVICE_ACCOUNT_PATH not set');
+}
+
+const { sendNotification } = notificationClient(serviceAccountPath);
 ```
 
 ### 4. Secrets Management
@@ -229,6 +242,7 @@ In CI/CD environments, use secrets management:
 Always validate device tokens before storing them in your database:
 
 ```typescript
+const { sendNotification } = notificationClient('/path/to/service-account.json');
 const result = await sendNotification(token, payload);
 
 if (!result.success && result.error?.includes('Invalid or unregistered')) {
@@ -239,7 +253,26 @@ if (!result.success && result.error?.includes('Invalid or unregistered')) {
 
 ## API Reference
 
-### `sendNotification(deviceToken, payload, options?)`
+### `notificationClient(serviceAccountPath, appName?)`
+
+Create a notification client instance.
+
+**Parameters:**
+- `serviceAccountPath` (string): Path to Firebase service account JSON file (required)
+- `appName` (string): Custom Firebase app name (optional)
+
+**Returns:** `NotificationClient` - A client object with `sendNotification` method
+
+**Throws:** `InitializationError` if credentials are missing or invalid
+
+**Example:**
+```typescript
+const client = notificationClient('/path/to/service-account.json');
+// or with custom app name
+const client = notificationClient('/path/to/service-account.json', 'my-app');
+```
+
+### `client.sendNotification(deviceToken, payload, options?)`
 
 Send a push notification to a device.
 
@@ -260,19 +293,6 @@ Send a push notification to a device.
 - `success` (boolean): Whether the notification was sent
 - `messageId` (string): Firebase message ID (if successful)
 - `error` (string): Error message (if failed)
-
-### `initializeFirebase(config?)`
-
-Manually initialize Firebase Admin SDK.
-
-**Parameters:**
-- `config` (FirebaseConfig): Configuration options (optional)
-  - `serviceAccountPath` (string): Path to service account JSON
-  - `appName` (string): Custom Firebase app name
-
-**Returns:** `admin.app.App` - The initialized Firebase app instance
-
-**Throws:** `InitializationError` if initialization fails
 
 ## Validation
 

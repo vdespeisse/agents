@@ -1,5 +1,7 @@
 # 01. Firebase Admin Notification Package
 
+> **Updated**: 2025-10-23 - Refactored from singleton pattern to functional client-based API. Removed process.env dependency for service account path.
+
 ## Meta
 
 - **ID**: firebase-notification-package-01
@@ -7,7 +9,7 @@
 
 ## Objective
 
-Build a simple, secure backend notification package using firebase-admin that can send push notifications to iOS devices with proper TypeScript types, error handling, and credential management.
+Build a simple, secure backend notification package using firebase-admin that can send push notifications to iOS devices with proper TypeScript types, error handling, and credential management. Uses a functional client-based API instead of singleton pattern.
 
 ## Deliverables
 
@@ -25,22 +27,22 @@ Build a simple, secure backend notification package using firebase-admin that ca
 - Create `NotificationPayload` interface with title, body, and optional data object
 - Create `NotificationOptions` interface for additional APNs configuration
 - Create `NotificationResult` interface for success/failure responses
-- Create `FirebaseConfig` interface for service account path and app name
+- Create `NotificationClientConfig` interface for service account path and app name (required path)
+- Create `NotificationClient` interface with sendNotification method
 - Export error types: `NotificationError`, `InitializationError`
 
-### 2. Implement Firebase Initialization (`src/firebase.ts`)
-- Create singleton pattern for Firebase Admin app initialization
-- Load service account credentials from file path (environment variable or parameter)
-- Implement `initializeFirebase(config?: FirebaseConfig)` function
-- Default service account path: `process.env.FIREBASE_SERVICE_ACCOUNT_PATH` or `./firebase-service-account.json`
+### 2. Implement Firebase App Creation (`src/firebase.ts`)
+- Create `createFirebaseApp(config: NotificationClientConfig)` function
+- Load service account credentials from required file path parameter
 - Validate credentials exist before initialization
 - Handle initialization errors with descriptive messages
-- Export `getFirebaseApp()` function to retrieve initialized app
-- Prevent multiple initializations (check if app already exists)
+- Generate unique app name if not provided to support multiple clients
+- Return initialized Firebase app instance
 
-### 3. Implement Notification Sending (`src/index.ts`)
-- Create `sendNotification(deviceToken: string, payload: NotificationPayload, options?: NotificationOptions)` function
-- Ensure Firebase is initialized before sending (auto-initialize if needed)
+### 3. Implement Notification Client (`src/index.ts`)
+- Create `notificationClient(serviceAccountPath: string, appName?: string)` function
+- Initialize Firebase app on client creation (not lazy)
+- Return client object with `sendNotification` method
 - Build FCM message with APNs-specific configuration for iOS
 - Set proper APNs headers and priority
 - Handle device token validation
@@ -51,7 +53,7 @@ Build a simple, secure backend notification package using firebase-admin that ca
   - Invalid payload format
 - Return `NotificationResult` with success status and message ID or error details
 - Export all types from types.ts
-- Export `initializeFirebase` for manual initialization
+- Support multiple independent clients
 
 ### 4. Update Package Configuration (`package.json`)
 - Add `firebase-admin` to dependencies (version ^12.0.0)
@@ -173,9 +175,17 @@ export interface NotificationResult {
   error?: string;
 }
 
-export interface FirebaseConfig {
-  serviceAccountPath?: string;
+export interface NotificationClientConfig {
+  serviceAccountPath: string;  // Required
   appName?: string;
+}
+
+export interface NotificationClient {
+  sendNotification: (
+    deviceToken: string,
+    payload: NotificationPayload,
+    options?: NotificationOptions
+  ) => Promise<NotificationResult>;
 }
 
 export class NotificationError extends Error {
@@ -193,59 +203,62 @@ export class InitializationError extends Error {
 }
 ```
 
-### Firebase Initialization (`src/firebase.ts`)
+### Firebase App Creation (`src/firebase.ts`)
 
 ```typescript
-export function initializeFirebase(config?: FirebaseConfig): admin.app.App;
-export function getFirebaseApp(): admin.app.App;
-export function isInitialized(): boolean;
+export function createFirebaseApp(config: NotificationClientConfig): admin.app.App;
 ```
 
 ### Main API (`src/index.ts`)
 
 ```typescript
-export async function sendNotification(
-  deviceToken: string,
-  payload: NotificationPayload,
-  options?: NotificationOptions
-): Promise<NotificationResult>;
+export function notificationClient(
+  serviceAccountPath: string,
+  appName?: string
+): NotificationClient;
 
-export { initializeFirebase } from './firebase';
 export * from './types';
 ```
 
-## Firebase Initialization Approach
+## Client-Based Approach
 
 ### Service Account Loading Strategy
 
-1. **Priority Order**:
-   - Explicit path passed to `initializeFirebase({ serviceAccountPath: '...' })`
-   - Environment variable `FIREBASE_SERVICE_ACCOUNT_PATH`
-   - Default path `./firebase-service-account.json` (relative to process.cwd())
+1. **Required Parameter**:
+   - Service account path must be explicitly provided to `notificationClient()`
+   - No environment variable fallback or default path
+   - Forces explicit credential management
 
 2. **Validation**:
    - Check file exists using `fs.existsSync()`
    - Validate JSON structure has required fields: `project_id`, `private_key`, `client_email`
    - Throw `InitializationError` with descriptive message if validation fails
 
-3. **Initialization**:
+3. **Client Creation**:
    - Use `admin.initializeApp()` with credential from file
-   - Store app instance in module-level variable
-   - Set initialized flag to prevent re-initialization
+   - Generate unique app name if not provided (supports multiple clients)
+   - Return client object with sendNotification method
+   - Each client is independent with its own Firebase app instance
 
-4. **Auto-initialization**:
-   - `sendNotification` checks if Firebase is initialized
-   - If not, calls `initializeFirebase()` with no arguments (uses defaults)
-   - Allows lazy initialization for convenience
+4. **Multiple Clients**:
+   - Support creating multiple clients for different Firebase projects
+   - Each client maintains its own Firebase app instance
+   - No shared state between clients
 
-### Environment Variables
+### Usage Pattern
 
-```bash
-# Required for production use
-FIREBASE_SERVICE_ACCOUNT_PATH=/path/to/firebase-service-account.json
+```typescript
+// Single client
+const client = notificationClient('/path/to/service-account.json');
+await client.sendNotification('token', { title: 'Hi', body: 'There' });
 
-# Optional: Custom app name
-FIREBASE_APP_NAME=opencode-notifications
+// Destructured (recommended)
+const { sendNotification } = notificationClient('/path/to/service-account.json');
+await sendNotification('token', { title: 'Hi', body: 'There' });
+
+// Multiple clients
+const prodClient = notificationClient('/path/to/prod.json', 'prod');
+const devClient = notificationClient('/path/to/dev.json', 'dev');
 ```
 
 ## Error Handling Strategy
