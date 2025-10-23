@@ -2,11 +2,18 @@
   "name": "opencode-setup",
   "version": "1.0.0",
   "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
     "start": "node demo/server.js"
   },
   "dependencies": {
     "fastify": "^5.2.0",
     "pino-pretty": "^13.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
   }
 }
