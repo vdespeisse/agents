@@ -1,12 +1,10 @@
-import * as admin from 'firebase-admin';
 import { createFirebaseApp } from './firebase.js';
 import { 
   NotificationPayload, 
   NotificationOptions, 
   NotificationResult,
   NotificationError,
-  NotificationClient,
-  NotificationClientConfig
+  NotificationClient
 } from './types.js';
 
 /**
