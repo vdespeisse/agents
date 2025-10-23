@@ -1,5 +1,5 @@
 ---
-description: "Creates detailed specifications with testable acceptance criteria"
+description: 'Creates detailed specifications with testable acceptance criteria'
 mode: subagent
 model: anthropic/claude-sonnet-4-5
 temperature: 0.1
@@ -11,12 +11,12 @@ tools:
   bash: false
 permissions:
   bash:
-    "*": "deny"
+    '*': 'deny'
   write:
-    ".tasks/**/specs/*.md": "allow"
-    "**/*": "deny"
+    '.tasks/**/specs/*.md': 'allow'
+    '**/*': 'deny'
   edit:
-    "**/*": "deny"
+    '**/*': 'deny'
 ---
 
 # Spec-Writer Subagent

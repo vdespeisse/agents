@@ -1,5 +1,5 @@
 ---
-description: "Security audits, quality assessment, and compliance validation"
+description: 'Security audits, quality assessment, and compliance validation'
 mode: subagent
 model: anthropic/claude-haiku-4-5
 temperature: 0.1
@@ -11,12 +11,12 @@ tools:
   bash: false
 permissions:
   bash:
-    "*": "deny"
+    '*': 'deny'
   write:
-    ".tasks/**/review/*.md": "allow"
-    "**/*": "deny"
+    '.tasks/**/review/*.md': 'allow'
+    '**/*': 'deny'
   edit:
-    "**/*": "deny"
+    '**/*': 'deny'
 ---
 
 # Reviewer Subagent

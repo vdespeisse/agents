@@ -29,17 +29,17 @@ None found ✅
 
 ```typescript
 // src/firebase.ts:23 - Replace:
-let serviceAccount: any;
+let serviceAccount: any
 
 // With:
 interface ServiceAccount {
-  project_id: string;
-  private_key: string;
-  client_email: string;
-  [key: string]: any; // Allow additional fields from Firebase
+  project_id: string
+  private_key: string
+  client_email: string
+  [key: string]: any // Allow additional fields from Firebase
 }
 
-let serviceAccount: ServiceAccount;
+let serviceAccount: ServiceAccount
 ```
 
 ```typescript
@@ -97,16 +97,16 @@ function handleFirebaseError(error: FirebaseError | Error | unknown): Notificati
 ```typescript
 // Option 1: Add optional logger to client config
 export interface NotificationClientConfig {
-  serviceAccountPath: string;
-  appName?: string;
+  serviceAccountPath: string
+  appName?: string
   logger?: {
-    error: (message: string, ...args: any[]) => void;
-  };
+    error: (message: string, ...args: any[]) => void
+  }
 }
 
 // Then in handleFirebaseError:
 if (config.logger) {
-  config.logger.error(`Notification send failed [${errorCode}]:`, errorMessage);
+  config.logger.error(`Notification send failed [${errorCode}]:`, errorMessage)
 }
 
 // Option 2: Remove logging from library (recommended)
@@ -157,11 +157,11 @@ function validateDeviceToken(token: string): void {
 
 ```typescript
 // Current:
-const finalAppName = appName || `notification-client-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+const finalAppName = appName || `notification-client-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
 // Better:
-import { randomUUID } from 'crypto';
-const finalAppName = appName || `notification-client-${randomUUID()}`;
+import { randomUUID } from 'crypto'
+const finalAppName = appName || `notification-client-${randomUUID()}`
 ```
 
 ### Issue 4: README type reference mismatch
@@ -176,20 +176,20 @@ import {
   NotificationPayload,
   NotificationOptions,
   NotificationResult,
-  FirebaseConfig,  // ❌ This doesn't exist
+  FirebaseConfig, // ❌ This doesn't exist
   NotificationError,
   InitializationError,
-} from '@opencode-setup/notification';
+} from '@opencode-setup/notification'
 
 // Should be:
 import {
   NotificationPayload,
   NotificationOptions,
   NotificationResult,
-  NotificationClientConfig,  // ✅ Correct type
+  NotificationClientConfig, // ✅ Correct type
   NotificationError,
   InitializationError,
-} from '@opencode-setup/notification';
+} from '@opencode-setup/notification'
 ```
 
 ### Issue 5: Incomplete error code mapping
@@ -214,6 +214,7 @@ case 'messaging/third-party-auth-error':
 ## Spec Compliance
 
 ✅ **All Deliverables Implemented**
+
 - [x] `src/types.ts` - Complete with all required interfaces and error classes
 - [x] `src/firebase.ts` - Firebase app creation with credential validation (exports `createFirebaseApp()`)
 - [x] `src/index.ts` - Main API with `notificationClient()` factory function (refactored from singleton)
@@ -223,11 +224,13 @@ case 'messaging/third-party-auth-error':
 - [x] `README.md` - Complete documentation with examples
 
 **API Refactoring Note**: The spec was updated to remove the singleton pattern. The implementation correctly:
+
 - ❌ Removed: `initializeFirebase()`, `getFirebaseApp()`, `isInitialized()` (old singleton functions)
 - ✅ Added: `notificationClient(serviceAccountPath, appName?)` factory function
 - ✅ Result: Each client call creates independent Firebase app instance with no shared state
 
 ✅ **All Acceptance Criteria Pass**
+
 - [x] Type Safety - All functions properly typed (minor `any` usage noted above)
 - [x] Firebase Initialization - Successful with valid credentials
 - [x] Functional Client-Based API - No singleton pattern, supports multiple clients
@@ -238,6 +241,7 @@ case 'messaging/third-party-auth-error':
 - [x] Multiple Independent Clients - Fully supported
 
 ✅ **Test Coverage**
+
 - **Total Tests**: 31 (all passing)
 - **Coverage Target**: 90%
 - **Actual Coverage**: Excellent - all major code paths tested

@@ -1,26 +1,26 @@
 export interface NotificationPayload {
-  title: string;
-  body: string;
-  data?: Record<string, string>;
+  title: string
+  body: string
+  data?: Record<string, string>
 }
 
 export interface NotificationOptions {
-  badge?: number;
-  sound?: string;
-  priority?: 'high' | 'normal';
-  contentAvailable?: boolean;
-  mutableContent?: boolean;
+  badge?: number
+  sound?: string
+  priority?: 'high' | 'normal'
+  contentAvailable?: boolean
+  mutableContent?: boolean
 }
 
 export interface NotificationResult {
-  success: boolean;
-  messageId?: string;
-  error?: string;
+  success: boolean
+  messageId?: string
+  error?: string
 }
 
 export interface NotificationClientConfig {
-  serviceAccountPath: string;
-  appName?: string;
+  serviceAccountPath: string
+  appName?: string
 }
 
 export interface NotificationClient {
@@ -28,19 +28,25 @@ export interface NotificationClient {
     deviceToken: string,
     payload: NotificationPayload,
     options?: NotificationOptions
-  ) => Promise<NotificationResult>;
+  ) => Promise<NotificationResult>
 }
 
 export class NotificationError extends Error {
-  constructor(message: string, public code?: string) {
-    super(message);
-    this.name = 'NotificationError';
+  constructor(
+    message: string,
+    public code?: string
+  ) {
+    super(message)
+    this.name = 'NotificationError'
   }
 }
 
 export class InitializationError extends Error {
-  constructor(message: string, public path?: string) {
-    super(message);
-    this.name = 'InitializationError';
+  constructor(
+    message: string,
+    public path?: string
+  ) {
+    super(message)
+    this.name = 'InitializationError'
   }
 }

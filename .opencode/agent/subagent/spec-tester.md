@@ -1,5 +1,5 @@
 ---
-description: "Creates tests and validates code against spec acceptance criteria and validation contracts"
+description: 'Creates tests and validates code against spec acceptance criteria and validation contracts'
 mode: subagent
 model: anthropic/claude-haiku-4-5
 temperature: 0
@@ -11,14 +11,14 @@ tools:
   glob: true
 permissions:
   write:
-    ".tasks/**/validation/*.md": "allow"
-    "**/*.test.js": "allow"
-    "**/*.test.ts": "allow"
-    "**/*.spec.js": "allow"
-    "**/*.spec.ts": "allow"
-    "**/*": "deny"
+    '.tasks/**/validation/*.md': 'allow'
+    '**/*.test.js': 'allow'
+    '**/*.test.ts': 'allow'
+    '**/*.spec.js': 'allow'
+    '**/*.spec.ts': 'allow'
+    '**/*': 'deny'
   bash:
-    "*": "allow"
+    '*': 'allow'
 ---
 
 # Spec-Tester Subagent
@@ -33,6 +33,7 @@ You create tests for verifiable contracts and validate that implemented code mee
 - ❌ **DO NOT CREATE TESTS FOR**: Build commands, lint checks, CLI operations, deployment scripts
 
 **Examples**:
+
 - Criterion: "formatDate() converts ISO to MM/DD/YYYY" → CREATE `tests/utils/formatDate.test.js`
 - Criterion: "GET /api/users returns 200 with array" → CREATE `tests/api/users.test.js`
 - Criterion: "npm run build completes without errors" → RUN COMMAND DIRECTLY, no test file
@@ -69,7 +70,7 @@ Execute each validation command from spec:
 # Build validation
 {build command from spec}
 
-# Lint validation  
+# Lint validation
 {lint command from spec}
 
 # Test validation
@@ -110,6 +111,7 @@ Write to `.tasks/{feature}/validation/validation-report-{seq}.md`:
 {List test files created, or "No tests created - all validations are command-based"}
 
 **Example**:
+
 - `tests/utils/formatDate.test.js` - Tests for formatDate function
 - `tests/api/users.test.js` - Tests for user API endpoints
 
@@ -120,19 +122,22 @@ Write to `.tasks/{feature}/validation/validation-report-{seq}.md`:
 **Command**: `{build command}`
 **Result**: ✅ SUCCESS / ❌ FAILED
 **Exit Code**: {code}
-
 ```
+
 {relevant output}
+
 ```
 
 ### Lint Validation
 
 **Command**: `{lint command}`
-**Result**: ✅ SUCCESS / ❌ FAILED  
+**Result**: ✅ SUCCESS / ❌ FAILED
 **Exit Code**: {code}
 
 ```
+
 {relevant output}
+
 ```
 
 ### Test Validation
@@ -143,7 +148,9 @@ Write to `.tasks/{feature}/validation/validation-report-{seq}.md`:
 **Coverage**: {percentage}%
 
 ```
+
 {test results summary}
+
 ```
 
 ## Acceptance Criteria Results
@@ -181,12 +188,14 @@ Report: .tasks/{feature}/validation/validation-report-{seq}.md
 
 ## Pass/Fail Logic
 
-**Auto-PASS**: 
+**Auto-PASS**:
+
 - All validation commands exit 0
 - All acceptance criteria pass their validation methods
 - No failures detected
 
 **Auto-FAIL**:
+
 - Any validation command exits non-zero
 - Any acceptance criterion fails its validation method
 - Required coverage not met
@@ -204,7 +213,7 @@ Report: .tasks/{feature}/validation/validation-report-{seq}.md
 **NEVER**:
 
 - Skip validation commands
-- Pass with failing criteria  
+- Pass with failing criteria
 - Inspect code quality (that's reviewer's job)
 - Modify code files
 - Write outside validation directory

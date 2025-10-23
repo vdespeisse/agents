@@ -24,6 +24,7 @@ Build a simple, secure backend notification package using firebase-admin that ca
 ## Implementation Steps
 
 ### 1. Define TypeScript Types (`src/types.ts`)
+
 - Create `NotificationPayload` interface with title, body, and optional data object
 - Create `NotificationOptions` interface for additional APNs configuration
 - Create `NotificationResult` interface for success/failure responses
@@ -32,6 +33,7 @@ Build a simple, secure backend notification package using firebase-admin that ca
 - Export error types: `NotificationError`, `InitializationError`
 
 ### 2. Implement Firebase App Creation (`src/firebase.ts`)
+
 - Create `createFirebaseApp(config: NotificationClientConfig)` function
 - Load service account credentials from required file path parameter
 - Validate credentials exist before initialization
@@ -40,6 +42,7 @@ Build a simple, secure backend notification package using firebase-admin that ca
 - Return initialized Firebase app instance
 
 ### 3. Implement Notification Client (`src/index.ts`)
+
 - Create `notificationClient(serviceAccountPath: string, appName?: string)` function
 - Initialize Firebase app on client creation (not lazy)
 - Return client object with `sendNotification` method
@@ -56,12 +59,14 @@ Build a simple, secure backend notification package using firebase-admin that ca
 - Support multiple independent clients
 
 ### 4. Update Package Configuration (`package.json`)
+
 - Add `firebase-admin` to dependencies (version ^12.0.0)
 - Add `@types/node` to devDependencies for Node.js types
 - Ensure build script generates proper ESM and CJS outputs
 - Add test coverage script
 
 ### 5. Implement Comprehensive Tests
+
 - **Unit Tests for Firebase Initialization**:
   - Test successful initialization with valid credentials
   - Test initialization with custom config
@@ -80,6 +85,7 @@ Build a simple, secure backend notification package using firebase-admin that ca
   - Mock Firebase messaging methods
 
 ### 6. Create Documentation (`README.md`)
+
 - Installation instructions
 - Environment variable setup (FIREBASE_SERVICE_ACCOUNT_PATH)
 - Basic usage example with sendNotification
@@ -132,13 +138,15 @@ Build a simple, secure backend notification package using firebase-admin that ca
 
 ## Test Requirements
 
-**Unit Tests**: 
+**Unit Tests**:
+
 - `firebase.ts`: initializeFirebase, getFirebaseApp, singleton behavior, error cases (AAA pattern)
 - `index.ts`: sendNotification with various payloads, auto-initialization, error handling (AAA pattern)
 - Mock firebase-admin module completely to avoid real Firebase calls
 - Use vitest mocking capabilities (vi.mock, vi.fn)
 
 **Edge Cases**:
+
 - Empty device token string
 - Null/undefined payload fields
 - Very long notification body (>4KB)
@@ -156,28 +164,28 @@ Build a simple, secure backend notification package using firebase-admin that ca
 
 ```typescript
 export interface NotificationPayload {
-  title: string;
-  body: string;
-  data?: Record<string, string>;
+  title: string
+  body: string
+  data?: Record<string, string>
 }
 
 export interface NotificationOptions {
-  badge?: number;
-  sound?: string;
-  priority?: 'high' | 'normal';
-  contentAvailable?: boolean;
-  mutableContent?: boolean;
+  badge?: number
+  sound?: string
+  priority?: 'high' | 'normal'
+  contentAvailable?: boolean
+  mutableContent?: boolean
 }
 
 export interface NotificationResult {
-  success: boolean;
-  messageId?: string;
-  error?: string;
+  success: boolean
+  messageId?: string
+  error?: string
 }
 
 export interface NotificationClientConfig {
-  serviceAccountPath: string;  // Required
-  appName?: string;
+  serviceAccountPath: string // Required
+  appName?: string
 }
 
 export interface NotificationClient {
@@ -185,20 +193,26 @@ export interface NotificationClient {
     deviceToken: string,
     payload: NotificationPayload,
     options?: NotificationOptions
-  ) => Promise<NotificationResult>;
+  ) => Promise<NotificationResult>
 }
 
 export class NotificationError extends Error {
-  constructor(message: string, public code?: string) {
-    super(message);
-    this.name = 'NotificationError';
+  constructor(
+    message: string,
+    public code?: string
+  ) {
+    super(message)
+    this.name = 'NotificationError'
   }
 }
 
 export class InitializationError extends Error {
-  constructor(message: string, public path?: string) {
-    super(message);
-    this.name = 'InitializationError';
+  constructor(
+    message: string,
+    public path?: string
+  ) {
+    super(message)
+    this.name = 'InitializationError'
   }
 }
 ```
@@ -206,18 +220,15 @@ export class InitializationError extends Error {
 ### Firebase App Creation (`src/firebase.ts`)
 
 ```typescript
-export function createFirebaseApp(config: NotificationClientConfig): admin.app.App;
+export function createFirebaseApp(config: NotificationClientConfig): admin.app.App
 ```
 
 ### Main API (`src/index.ts`)
 
 ```typescript
-export function notificationClient(
-  serviceAccountPath: string,
-  appName?: string
-): NotificationClient;
+export function notificationClient(serviceAccountPath: string, appName?: string): NotificationClient
 
-export * from './types';
+export * from './types'
 ```
 
 ## Client-Based Approach
@@ -249,16 +260,16 @@ export * from './types';
 
 ```typescript
 // Single client
-const client = notificationClient('/path/to/service-account.json');
-await client.sendNotification('token', { title: 'Hi', body: 'There' });
+const client = notificationClient('/path/to/service-account.json')
+await client.sendNotification('token', { title: 'Hi', body: 'There' })
 
 // Destructured (recommended)
-const { sendNotification } = notificationClient('/path/to/service-account.json');
-await sendNotification('token', { title: 'Hi', body: 'There' });
+const { sendNotification } = notificationClient('/path/to/service-account.json')
+await sendNotification('token', { title: 'Hi', body: 'There' })
 
 // Multiple clients
-const prodClient = notificationClient('/path/to/prod.json', 'prod');
-const devClient = notificationClient('/path/to/dev.json', 'dev');
+const prodClient = notificationClient('/path/to/prod.json', 'prod')
+const devClient = notificationClient('/path/to/dev.json', 'dev')
 ```
 
 ## Error Handling Strategy

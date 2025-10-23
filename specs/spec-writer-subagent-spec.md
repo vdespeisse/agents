@@ -1,32 +1,38 @@
 # Spec-Writer Subagent Specification
 
 ## Purpose
+
 The Spec-Writer Subagent transforms high-level task descriptions into detailed, testable specifications with clear acceptance criteria and validation contracts. It creates the blueprint that the Coder Subagent will implement and the Reviewer Subagent will validate against.
 
 ## Agent Type
+
 **Subagent** - Invoked by Orchestrator for each subtask before coding begins
 
 ## Core Responsibilities
 
 ### 1. Specification Creation
+
 - Transform task description into detailed implementation spec
 - Define clear objectives and deliverables
 - Create step-by-step implementation guide
 - Establish technical approach and patterns to use
 
 ### 2. Contract Definition
+
 - Generate binary pass/fail acceptance criteria
 - Define validation methods and commands
 - Create test requirements (unit, integration, e2e)
 - Specify success indicators and verification steps
 
 ### 3. Context Analysis
+
 - Analyze existing codebase patterns
 - Identify relevant files and dependencies
 - Determine integration points
 - Flag potential conflicts or risks
 
 ### 4. Documentation
+
 - Write clear, actionable specifications
 - Use structured format for consistency
 - Include code examples where helpful
@@ -35,6 +41,7 @@ The Spec-Writer Subagent transforms high-level task descriptions into detailed, 
 ## Workflow Process
 
 ### Phase 1: Analysis
+
 1. Receive task description from spec-driven agent
 2. Read task context and requirements
 3. Search codebase for existing patterns
@@ -42,6 +49,7 @@ The Spec-Writer Subagent transforms high-level task descriptions into detailed, 
 5. Analyze dependencies and integration points
 
 ### Phase 2: Specification
+
 1. Define task objective (one-line summary)
 2. List concrete deliverables (files, functions, components)
 3. Create implementation steps (sequential, actionable)
@@ -49,6 +57,7 @@ The Spec-Writer Subagent transforms high-level task descriptions into detailed, 
 5. Document any assumptions or constraints
 
 ### Phase 3: Contract Creation
+
 1. Generate acceptance criteria (must be binary pass/fail)
 2. Define unit test requirements (which functions/modules)
 3. Define integration test requirements (workflows to validate)
@@ -56,6 +65,7 @@ The Spec-Writer Subagent transforms high-level task descriptions into detailed, 
 5. Create exit criteria (how to know task is complete)
 
 ### Phase 4: Output
+
 1. Write spec file to `.tasks/{feature}/specs/{seq}-{task}.md`
 2. Validate spec file is complete and actionable
 3. Return file path to spec-driven agent
@@ -63,10 +73,12 @@ The Spec-Writer Subagent transforms high-level task descriptions into detailed, 
 ## Spec File Structure
 
 ### Standard Template
-```markdown
+
+````markdown
 # {seq}. {Task Title}
 
 ## Meta
+
 - **ID**: {feature}-{seq}
 - **Feature**: {feature-slug}
 - **Priority**: P1/P2/P3
@@ -74,14 +86,17 @@ The Spec-Writer Subagent transforms high-level task descriptions into detailed, 
 - **Tags**: [implementation, tests-required, security-check]
 
 ## Objective
+
 {Single, clear sentence describing what this task accomplishes}
 
 ## Context
+
 **Why this task**: {Brief explanation of purpose and motivation}
 **Affected Areas**: {Which parts of codebase this touches}
 **Integration Points**: {How this connects to other features}
 
 ## Deliverables
+
 - [ ] File: `{filepath}` - {what gets added/modified}
 - [ ] Function: `{functionName}` - {purpose and signature}
 - [ ] Component: `{ComponentName}` - {what it does}
@@ -90,29 +105,39 @@ The Spec-Writer Subagent transforms high-level task descriptions into detailed, 
 ## Implementation Steps
 
 ### Step 1: {Action}
+
 **What**: {Clear description of what to do}
 **How**: {Technical approach}
+
 ```language
 // Code example if helpful
 ```
+````
+
 **Why**: {Reasoning for this approach}
 
 ### Step 2: {Action}
+
 {Repeat structure}
 
 ## Technical Approach
+
 **Patterns to Use**:
+
 - {Pattern name}: {When and why to use it}
 - {Library/tool}: {How to integrate}
 
 **Security Considerations**:
+
 - {Security requirement or check}
 - {Input validation needed}
 
 **Performance Considerations**:
+
 - {Performance requirement or optimization}
 
 ## Acceptance Criteria
+
 Binary pass/fail criteria only:
 
 - [ ] {Specific, measurable criterion}
@@ -128,55 +153,70 @@ Binary pass/fail criteria only:
 ## Test Requirements
 
 ### Unit Tests
+
 **File**: `{test-file-path}`
 **Coverage Target**: {percentage}%
 
 **Functions to Test**:
-- `{functionName}`: 
+
+- `{functionName}`:
   - Arrange: {Setup needed}
   - Act: {Function call}
   - Assert: {Expected outcome}
 
 **Edge Cases**:
+
 - {Edge case description and expected behavior}
 
 ### Integration Tests
+
 **Workflow**: {High-level workflow to test}
 **Steps**:
+
 1. {Test step}
 2. {Test step}
 3. {Expected result}
 
 ### E2E Tests (if applicable)
+
 **User Flow**: {User journey to test}
 **Validation**: {How to verify}
 
 ## Validation
 
 ### Build Validation
+
 ```bash
 {build command}
 ```
+
 **Expected**: No errors, clean build
 
 ### Lint Validation
+
 ```bash
 {lint command}
 ```
+
 **Expected**: No warnings or errors
 
 ### Test Validation
+
 ```bash
 {test command}
 ```
+
 **Expected**: All tests pass, coverage meets target
 
 ### Manual Validation
+
 1. {Manual step to verify}
 2. {Expected outcome}
 
 ## Exit Criteria
+
 This task is complete when:
+
 - [ ] All deliverables created/modified as specified
 - [ ] All acceptance criteria pass
 - [ ] All tests pass with required coverage
@@ -184,15 +224,20 @@ This task is complete when:
 - [ ] Code reviewed and approved
 
 ## Notes
+
 **Assumptions**:
+
 - {Any assumptions made}
 
 **References**:
+
 - {Links to related docs, issues, or design}
 
 **Risks**:
+
 - {Potential risks or concerns}
-```
+
+````
 
 ## Contract Validation Rules
 
@@ -269,18 +314,22 @@ This task is complete when:
 ...
 
 **Ready for coder agent to implement.**
-```
+````
 
 ### When Clarification Needed
+
 ```markdown
 ## Clarification Required
+
 **Task**: {seq} — {task title}
 
 ### Questions
+
 1. {Specific question about requirement}
 2. {Another question}
 
 ### Analysis So Far
+
 - {What we know}
 - {What's unclear}
 - {Implications of ambiguity}
@@ -291,16 +340,19 @@ This task is complete when:
 ## Error Handling
 
 ### Insufficient Context
+
 - Request more details from spec-driven agent
 - Identify specific missing information
 - Suggest reasonable defaults if appropriate
 
 ### Conflicting Requirements
+
 - Flag conflict clearly
 - Present options with tradeoffs
 - Request spec-driven agent decision
 
 ### Technical Uncertainty
+
 - Research existing patterns in codebase
 - Present multiple approaches with pros/cons
 - Recommend best option with reasoning
@@ -308,6 +360,7 @@ This task is complete when:
 ## Validation Criteria
 
 Before returning spec to spec-driven agent:
+
 - [ ] Objective is clear and single-purpose
 - [ ] All deliverables are concrete and specific
 - [ ] Implementation steps are actionable and sequential
@@ -320,6 +373,7 @@ Before returning spec to spec-driven agent:
 ## Success Metrics
 
 The spec-writer is successful when:
+
 - Coder can implement without confusion
 - Reviewer can validate against clear criteria
 - All acceptance criteria are testable

@@ -1,5 +1,5 @@
 ---
-description: "Implements code according to specifications with security focus"
+description: 'Implements code according to specifications with security focus'
 mode: subagent
 model: anthropic/claude-sonnet-4-5
 temperature: 0
@@ -13,13 +13,13 @@ tools:
   patch: true
 permissions:
   bash:
-    "*": "allow"
+    '*': 'allow'
   edit:
-    "**/*.env*": "deny"
-    "**/*.key": "deny"
-    "**/*.secret": "deny"
-    "node_modules/**": "deny"
-    ".git/**": "deny"
+    '**/*.env*': 'deny'
+    '**/*.key': 'deny'
+    '**/*.secret': 'deny'
+    'node_modules/**': 'deny'
+    '.git/**': 'deny'
 ---
 
 # Coder Subagent
@@ -55,19 +55,19 @@ For each deliverable:
 
 ```typescript
 // Auth check
-const user = await getCurrentUser();
-if (!user) return { error: "Unauthorized" };
+const user = await getCurrentUser()
+if (!user) return { error: 'Unauthorized' }
 
 // Input validation
-const validated = schema.safeParse(data);
-if (!validated.success) return { error: "Validation failed" };
+const validated = schema.safeParse(data)
+if (!validated.success) return { error: 'Validation failed' }
 
 // Secure error handling (no sensitive data in logs)
 try {
-  return { success: true, data: result };
+  return { success: true, data: result }
 } catch (error) {
-  console.error("Operation failed:", error.message);
-  return { error: "Operation failed" };
+  console.error('Operation failed:', error.message)
+  return { error: 'Operation failed' }
 }
 ```
 

@@ -21,74 +21,68 @@ npm install @opencode-setup/notification
 ### Create a Notification Client
 
 ```typescript
-import { notificationClient } from '@opencode-setup/notification';
+import { notificationClient } from '@opencode-setup/notification'
 
 // Create a client with your service account path
-const client = notificationClient('/path/to/firebase-service-account.json');
+const client = notificationClient('/path/to/firebase-service-account.json')
 
 // Send a notification
-const result = await client.sendNotification(
-  'device-token-here',
-  {
-    title: 'Hello!',
-    body: 'This is a test notification',
-  }
-);
+const result = await client.sendNotification('device-token-here', {
+  title: 'Hello!',
+  body: 'This is a test notification',
+})
 
 if (result.success) {
-  console.log('Notification sent:', result.messageId);
+  console.log('Notification sent:', result.messageId)
 } else {
-  console.error('Failed to send:', result.error);
+  console.error('Failed to send:', result.error)
 }
 ```
 
 ### Destructured API (Recommended)
 
 ```typescript
-import { notificationClient } from '@opencode-setup/notification';
+import { notificationClient } from '@opencode-setup/notification'
 
 // Destructure for convenience
-const { sendNotification } = notificationClient('/path/to/service-account.json');
+const { sendNotification } = notificationClient('/path/to/service-account.json')
 
 const result = await sendNotification('device-token', {
   title: 'Hello',
   body: 'World',
-});
+})
 ```
 
 ### Send Notification with Custom Data
 
 ```typescript
-const { sendNotification } = notificationClient('/path/to/service-account.json');
+const { sendNotification } = notificationClient('/path/to/service-account.json')
 
-const result = await sendNotification(
-  'device-token-here',
-  {
-    title: 'New Message',
-    body: 'You have a new message from John',
-    data: {
-      userId: '123',
-      chatId: '456',
-      action: 'open_chat',
-    },
-  }
-);
+const result = await sendNotification('device-token-here', {
+  title: 'New Message',
+  body: 'You have a new message from John',
+  data: {
+    userId: '123',
+    chatId: '456',
+    action: 'open_chat',
+  },
+})
 ```
 
 ### Send Notification with Options
 
 ```typescript
-import { notificationClient, NotificationOptions } from '@opencode-setup/notification';
+import { notificationClient, NotificationOptions } from '@opencode-setup/notification'
 
-const { sendNotification } = notificationClient('/path/to/service-account.json');
+const { sendNotification } = notificationClient('/path/to/service-account.json')
 
 const options: NotificationOptions = {
-  badge: 5,              // Badge count on app icon
-  sound: 'default',      // Notification sound
-  priority: 'high',      // 'high' or 'normal'
+  badge: 5, // Badge count on app icon
+  sound: 'default', // Notification sound
+  priority: 'high', // 'high' or 'normal'
   contentAvailable: true, // Wake app in background
-  mutableContent: true,  // Allow notification modification
-};
+  mutableContent: true, // Allow notification modification
+}
 
 const result = await sendNotification(
   'device-token-here',
@@ -97,7 +91,7 @@ const result = await sendNotification(
     body: 'Please check this message',
   },
   options
-);
+)
 ```
 
 ## Multiple Clients
@@ -105,17 +99,17 @@ const result = await sendNotification(
 You can create multiple independent notification clients for different Firebase projects:
 
 ```typescript
-import { notificationClient } from '@opencode-setup/notification';
+import { notificationClient } from '@opencode-setup/notification'
 
 // Client for production
-const prodClient = notificationClient('/path/to/prod-service-account.json', 'prod-app');
+const prodClient = notificationClient('/path/to/prod-service-account.json', 'prod-app')
 
 // Client for staging
-const stagingClient = notificationClient('/path/to/staging-service-account.json', 'staging-app');
+const stagingClient = notificationClient('/path/to/staging-service-account.json', 'staging-app')
 
 // Use them independently
-await prodClient.sendNotification('token', { title: 'Prod', body: 'Message' });
-await stagingClient.sendNotification('token', { title: 'Staging', body: 'Message' });
+await prodClient.sendNotification('token', { title: 'Prod', body: 'Message' })
+await stagingClient.sendNotification('token', { title: 'Staging', body: 'Message' })
 ```
 
 ## Error Handling
@@ -123,25 +117,25 @@ await stagingClient.sendNotification('token', { title: 'Staging', body: 'Message
 The package provides comprehensive error handling:
 
 ```typescript
-import { notificationClient } from '@opencode-setup/notification';
+import { notificationClient } from '@opencode-setup/notification'
 
-const { sendNotification } = notificationClient('/path/to/service-account.json');
-const result = await sendNotification(deviceToken, payload);
+const { sendNotification } = notificationClient('/path/to/service-account.json')
+const result = await sendNotification(deviceToken, payload)
 
 if (!result.success) {
   // Handle specific error cases
   switch (result.error) {
     case 'Invalid or unregistered device token':
       // Remove token from database
-      break;
+      break
     case 'Firebase authentication failed':
       // Check service account credentials
-      break;
+      break
     case 'Firebase messaging service is temporarily unavailable':
       // Retry later
-      break;
+      break
     default:
-      console.error('Notification failed:', result.error);
+      console.error('Notification failed:', result.error)
   }
 }
 ```
@@ -151,14 +145,14 @@ if (!result.success) {
 The package throws `InitializationError` when client creation fails:
 
 ```typescript
-import { notificationClient, InitializationError } from '@opencode-setup/notification';
+import { notificationClient, InitializationError } from '@opencode-setup/notification'
 
 try {
-  const client = notificationClient('/invalid/path.json');
+  const client = notificationClient('/invalid/path.json')
 } catch (error) {
   if (error instanceof InitializationError) {
-    console.error('Init failed:', error.message);
-    console.error('Path:', error.path);
+    console.error('Init failed:', error.message)
+    console.error('Path:', error.path)
   }
 }
 ```
@@ -176,7 +170,7 @@ import {
   NotificationClientConfig,
   NotificationError,
   InitializationError,
-} from '@opencode-setup/notification';
+} from '@opencode-setup/notification'
 
 // Use types in your code
 const payload: NotificationPayload = {
@@ -185,13 +179,13 @@ const payload: NotificationPayload = {
   data: {
     key: 'value',
   },
-};
+}
 
 const options: NotificationOptions = {
   badge: 1,
   sound: 'default',
   priority: 'high',
-};
+}
 ```
 
 ## Security Best Practices
@@ -220,12 +214,12 @@ Store service account paths securely:
 
 ```typescript
 // Use environment variables
-const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH
 if (!serviceAccountPath) {
-  throw new Error('FIREBASE_SERVICE_ACCOUNT_PATH not set');
+  throw new Error('FIREBASE_SERVICE_ACCOUNT_PATH not set')
 }
 
-const { sendNotification } = notificationClient(serviceAccountPath);
+const { sendNotification } = notificationClient(serviceAccountPath)
 ```
 
 ### 4. Secrets Management
@@ -242,12 +236,12 @@ In CI/CD environments, use secrets management:
 Always validate device tokens before storing them in your database:
 
 ```typescript
-const { sendNotification } = notificationClient('/path/to/service-account.json');
-const result = await sendNotification(token, payload);
+const { sendNotification } = notificationClient('/path/to/service-account.json')
+const result = await sendNotification(token, payload)
 
 if (!result.success && result.error?.includes('Invalid or unregistered')) {
   // Remove invalid token from database
-  await removeTokenFromDatabase(token);
+  await removeTokenFromDatabase(token)
 }
 ```
 
@@ -258,6 +252,7 @@ if (!result.success && result.error?.includes('Invalid or unregistered')) {
 Create a notification client instance.
 
 **Parameters:**
+
 - `serviceAccountPath` (string): Path to Firebase service account JSON file (required)
 - `appName` (string): Custom Firebase app name (optional)
 
@@ -266,10 +261,11 @@ Create a notification client instance.
 **Throws:** `InitializationError` if credentials are missing or invalid
 
 **Example:**
+
 ```typescript
-const client = notificationClient('/path/to/service-account.json');
+const client = notificationClient('/path/to/service-account.json')
 // or with custom app name
-const client = notificationClient('/path/to/service-account.json', 'my-app');
+const client = notificationClient('/path/to/service-account.json', 'my-app')
 ```
 
 ### `client.sendNotification(deviceToken, payload, options?)`
@@ -277,6 +273,7 @@ const client = notificationClient('/path/to/service-account.json', 'my-app');
 Send a push notification to a device.
 
 **Parameters:**
+
 - `deviceToken` (string): The FCM device token
 - `payload` (NotificationPayload): The notification content
   - `title` (string): Notification title (required)
@@ -290,6 +287,7 @@ Send a push notification to a device.
   - `mutableContent` (boolean): Allow notification modification
 
 **Returns:** `Promise<NotificationResult>`
+
 - `success` (boolean): Whether the notification was sent
 - `messageId` (string): Firebase message ID (if successful)
 - `error` (string): Error message (if failed)
@@ -330,6 +328,7 @@ npm run build
 ```
 
 This generates:
+
 - `dist/index.js` - ESM format
 - `dist/index.cjs` - CommonJS format
 - `dist/index.d.ts` - TypeScript definitions
