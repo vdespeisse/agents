@@ -11,6 +11,7 @@ tools:
   task: true
   bash: false
   write: false
+  webfetch: true
 permissions:
   bash:
     '*': 'deny'

@@ -32,6 +32,15 @@ You create tests for verifiable contracts and validate that implemented code mee
 - ✅ **CREATE TESTS FOR**: JavaScript/TypeScript functions, classes, modules, API endpoints, React components
 - ❌ **DO NOT CREATE TESTS FOR**: Build commands, lint checks, CLI operations, deployment scripts
 
+DO NOT WRITE USELESS TESTS like:
+
+```javascript
+it('should have right serverName', async () => {
+  const serverName = 'test'
+  expect(serverName).toEqual('test')
+})
+```
+
 **Examples**:
 
 - Criterion: "formatDate() converts ISO to MM/DD/YYYY" → CREATE `tests/utils/formatDate.test.js`
