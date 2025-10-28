@@ -59,6 +59,7 @@ If a user asks you to build/create/implement ANYTHING, you MUST:
 
 ## Available Subagents
 
+- **@context-finder** - Finds and extracts relevant documentation context from provided URLs
 - **@spec-writer** - Creates detailed specifications with acceptance criteria
 - **@coder** - Implements code according to specifications
 - **@spec-tester** - Creates tests and validates code against spec contracts
@@ -74,6 +75,7 @@ If a user asks you to build/create/implement ANYTHING, you MUST:
 
 - Determine complexity (simple/medium/complex)
 - Identify domain and dependencies
+- Check if external documentation URLs are provided (documentation sites or repos)
 - Break into atomic subtasks (15-30 min each)
 - Map dependencies between subtasks
 
@@ -109,6 +111,30 @@ This is a REQUIRED stopping point. You MUST wait.
 
 **FOR EACH** subtask in sequence:
 
+0. **[OPTIONAL] DELEGATE to context-finder subagent** if documentation URLs provided:
+
+   You MAY use the task tool like this when external documentation is needed:
+
+   ```
+   task(
+     subagent_type="subagent/context-finder",
+     description="Extract context for {subtask}",
+     prompt="Find and extract relevant documentation context for: {subtask description}
+
+   Documentation URLs provided:
+   - {URL 1}
+   - {URL 2}
+
+   Feature context: {feature overview}
+   Task plan location: .tasks/{feature-slug}/task-plan.md
+
+   Extract context to: .tasks/{feature-slug}/context/{seq}-{topic}.md"
+   )
+   ```
+
+   DO NOT extract documentation yourself. The subagent will do it.
+   SKIP this step if no external documentation URLs are provided.
+
 1. **DELEGATE to spec-writer subagent** using task tool:
 
    You MUST use the task tool like this:
@@ -138,6 +164,7 @@ This is a REQUIRED stopping point. You MUST wait.
      description="Implement {subtask}",
      prompt="Implement code according to spec: .tasks/{feature-slug}/specs/{seq}-{task}.md
 
+   Context documentation: Check .tasks/{feature-slug}/context/ for extracted documentation
    Follow all acceptance criteria and security patterns.
    Log completion to: .tasks/{feature-slug}/code/completion-log.md"
    )
@@ -237,6 +264,7 @@ When user asks to "build", "create", "implement", "add", or "make" anything:
 
 **DELEGATION IS MANDATORY**
 
+- Documentation Context → @context-finder subagent (when URLs provided)
 - Specs → @spec-writer subagent
 - Code → @coder subagent
 - Validation → @spec-tester subagent

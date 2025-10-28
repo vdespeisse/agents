@@ -38,6 +38,14 @@ You implement code according to specifications, focusing on clean, secure, maint
 
 ### 2. GATHER Context
 
+**Check for external documentation context**:
+
+- Look for context files in `.tasks/{feature}/context/` directory
+- Read all context markdown files if they exist
+- Use documentation examples and patterns as reference
+
+**Analyze codebase**:
+
 - Search codebase for similar patterns (grep/glob)
 - Read existing files to modify
 - Understand conventions and style
@@ -48,6 +56,7 @@ For each deliverable:
 
 - Create/modify files as specified
 - Follow implementation steps from spec
+- **Use patterns and examples from context files** (if available in `.tasks/{feature}/context/`)
 - Apply security patterns
 - Match existing code style
 
@@ -129,6 +138,8 @@ Ready for review.
 
 **ALWAYS**:
 
+- Check for context files in `.tasks/{feature}/context/` before implementing
+- Use API patterns and examples from context documentation when available
 - Follow spec exactly
 - Match existing code style
 - Implement security validation
