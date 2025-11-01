@@ -1,26 +1,46 @@
 # OpenCode Setup Scripts
 
-This directory contains scripts to easily install the OpenCode configuration in your projects.
+This directory contains scripts to easily install OpenCode agents in your projects.
+
+## Available Agents
+
+- **spec-driven**: Specification-driven development agent with subagents for writing specs, coding, reviewing, and testing
+- **tdd**: Test-driven development agent for writing tests first and then implementing code
 
 ## Quick Install (One-Line Command)
 
 From any project directory, run:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) <agent> [target-path]
 ```
 
 Or using wget:
 
 ```bash
-bash <(wget -qO- https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh)
+bash <(wget -qO- https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) <agent> [target-path]
+```
+
+### Examples
+
+Install the spec-driven agent in current directory:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) spec-driven
+```
+
+Install the tdd agent in a specific directory:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) tdd /path/to/project
 ```
 
 This will:
 
 1. Clone the `opencode-setup` repository to a temporary directory
-2. Copy the `.opencode` directory to your current project
-3. Clean up temporary files
+2. Create the `.opencode` directory if it doesn't exist
+3. Copy the selected agent to `.opencode/agent`
+4. Clean up temporary files
 
 ## Manual Installation
 
@@ -32,10 +52,10 @@ git clone git@github.com:vdespeisse/agents.git /tmp/opencode-setup
 
 # Run the setup script in your project directory
 cd /path/to/your/project
-bash /tmp/opencode-setup/scripts/setup.sh
+bash /tmp/opencode-setup/scripts/setup.sh spec-driven
 
 # Or specify a target directory
-bash /tmp/opencode-setup/scripts/setup.sh /path/to/target/project
+bash /tmp/opencode-setup/scripts/setup.sh spec-driven /path/to/target/project
 ```
 
 ## Scripts
@@ -45,16 +65,20 @@ bash /tmp/opencode-setup/scripts/setup.sh /path/to/target/project
 The one-line installer that handles everything automatically:
 
 - Clones the repository to a temporary location
-- Runs the setup script
+- Runs the setup script with the specified agent
 - Cleans up after itself
+
+**Usage**: `./install.sh <agent> [target-path]`
 
 ### `setup.sh`
 
 The main setup script that:
 
 - Creates the `.opencode` directory if it doesn't exist
-- Copies all OpenCode configuration files
-- Can be run with an optional target directory argument
+- Copies the selected agent configuration to `.opencode/agent`
+- Lists available agents if none is specified
+
+**Usage**: `./setup.sh <agent> [target-path]`
 
 ## Requirements
 
@@ -64,21 +88,31 @@ The main setup script that:
 
 ## Examples
 
-### Install in current directory
+### Install spec-driven agent in current directory
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) spec-driven
+```
+
+### Install tdd agent in current directory
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) tdd
 ```
 
 ### Install in specific directory
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) /path/to/project
+bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) spec-driven /path/to/project
 ```
 
-### Update existing installation
+### Switch to a different agent
 
-Simply run the installer again - it will overwrite the existing `.opencode` directory with the latest version.
+Simply run the installer again with a different agent name - it will replace the existing agent configuration:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) tdd
+```
 
 ## Troubleshooting
 

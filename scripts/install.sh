@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # OpenCode One-Line Installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh | bash
-# Or: bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh)
+# Usage: curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh | bash -s <agent> [target-path]
+# Or: bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) <agent> [target-path]
+# Example: bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) spec-driven .
 
 set -e
 
@@ -15,7 +16,8 @@ NC='\033[0m' # No Color
 
 REPO_URL="git@github.com:vdespeisse/agents.git"
 TEMP_DIR=$(mktemp -d)
-TARGET_DIR="${1:-.}"
+AGENT_NAME="$1"
+TARGET_DIR="${2:-.}"
 
 echo -e "${BLUE}OpenCode Setup Installer${NC}"
 echo "================================"
@@ -37,6 +39,16 @@ if ! command -v git &> /dev/null; then
     exit 1
 fi
 
+# Check if agent name is provided
+if [ -z "$AGENT_NAME" ]; then
+    echo -e "${RED}Error: Agent name is required${NC}"
+    echo ""
+    echo "Usage: $0 <agent> [target-path]"
+    echo ""
+    echo "Available agents: spec-driven, tdd"
+    exit 1
+fi
+
 # Clone the repository
 echo -e "${GREEN}Cloning opencode-setup repository...${NC}"
 if ! git clone --depth 1 "$REPO_URL" "$TEMP_DIR" 2>/dev/null; then
@@ -47,7 +59,7 @@ fi
 
 # Run the setup script
 echo -e "${GREEN}Running setup script...${NC}"
-bash "$TEMP_DIR/scripts/setup.sh" "$TARGET_DIR"
+bash "$TEMP_DIR/scripts/setup.sh" "$AGENT_NAME" "$TARGET_DIR"
 
 echo -e "${GREEN}✓ Installation complete!${NC}"
-echo -e "You can now use OpenCode in your project."
+echo -e "You can now use OpenCode with the $AGENT_NAME agent in your project."
