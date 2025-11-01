@@ -127,9 +127,6 @@ This is a REQUIRED stopping point. You MUST wait.
    - Follows TypeScript best practices
 
    Previous tests context: {if applicable, mention what's already tested}
-
-   Document test creation in: .tasks/{feature-slug}/tdd/cycle-{seq}-test.md"
-   )
    ```
 
    DO NOT write the test yourself. The subagent will do it.
@@ -157,8 +154,6 @@ This is a REQUIRED stopping point. You MUST wait.
 
    Run tests using: npm test (or appropriate test command)
    Verify ALL tests pass before completing.
-
-   Document implementation in: .tasks/{feature-slug}/tdd/cycle-{seq}-code.md"
    )
    ```
 
