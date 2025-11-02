@@ -1,35 +1,35 @@
 # OpenCode Setup Scripts
 
-This directory contains scripts to easily install OpenCode agents in your projects.
+This directory contains scripts to easily install OpenCode setups in your projects.
 
-## Available Agents
+## Available Setups
 
-- **spec-driven**: Specification-driven development agent with subagents for writing specs, coding, reviewing, and testing
-- **tdd**: Test-driven development agent for writing tests first and then implementing code
+- **spec-driven**: Specification-driven development setup with agents for writing specs, coding, reviewing, and testing
+- **tdd**: Test-driven development setup with agents for writing tests first and then implementing code, plus testing context files
 
 ## Quick Install (One-Line Command)
 
 From any project directory, run:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) <agent> [target-path]
+bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) <setup-name> [target-path]
 ```
 
 Or using wget:
 
 ```bash
-bash <(wget -qO- https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) <agent> [target-path]
+bash <(wget -qO- https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) <setup-name> [target-path]
 ```
 
 ### Examples
 
-Install the spec-driven agent in current directory:
+Install the spec-driven setup in current directory:
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) spec-driven
 ```
 
-Install the tdd agent in a specific directory:
+Install the tdd setup in a specific directory:
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) tdd /path/to/project
@@ -39,8 +39,9 @@ This will:
 
 1. Clone the `opencode-setup` repository to a temporary directory
 2. Create the `.opencode` directory if it doesn't exist
-3. Copy the selected agent to `.opencode/agent`
-4. Clean up temporary files
+3. Copy the selected setup contents (agent/, context/, etc.) to `.opencode/`
+4. Skip any files that already exist (won't overwrite)
+5. Clean up temporary files
 
 ## Manual Installation
 
@@ -58,6 +59,20 @@ bash /tmp/opencode-setup/scripts/setup.sh spec-driven
 bash /tmp/opencode-setup/scripts/setup.sh spec-driven /path/to/target/project
 ```
 
+## Multiple Setups
+
+You can install multiple setups in the same project! The script will **not overwrite** existing files, so you can safely layer different setups:
+
+```bash
+# Install spec-driven first
+bash scripts/setup.sh spec-driven
+
+# Add tdd context files without overwriting the spec-driven agent
+bash scripts/setup.sh tdd
+```
+
+This allows you to combine different agents and context files in a single project.
+
 ## Scripts
 
 ### `install.sh`
@@ -65,20 +80,21 @@ bash /tmp/opencode-setup/scripts/setup.sh spec-driven /path/to/target/project
 The one-line installer that handles everything automatically:
 
 - Clones the repository to a temporary location
-- Runs the setup script with the specified agent
+- Runs the setup script with the specified setup
 - Cleans up after itself
 
-**Usage**: `./install.sh <agent> [target-path]`
+**Usage**: `./install.sh <setup-name> [target-path]`
 
 ### `setup.sh`
 
 The main setup script that:
 
 - Creates the `.opencode` directory if it doesn't exist
-- Copies the selected agent configuration to `.opencode/agent`
-- Lists available agents if none is specified
+- Copies the selected setup contents to `.opencode/` (agent/, context/, etc.)
+- **Does not overwrite existing files** - safe to run multiple times
+- Lists available setups if none is specified
 
-**Usage**: `./setup.sh <agent> [target-path]`
+**Usage**: `./setup.sh <setup-name> [target-path]`
 
 ## Requirements
 
@@ -88,13 +104,13 @@ The main setup script that:
 
 ## Examples
 
-### Install spec-driven agent in current directory
+### Install spec-driven setup in current directory
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) spec-driven
 ```
 
-### Install tdd agent in current directory
+### Install tdd setup in current directory
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) tdd
@@ -106,12 +122,24 @@ bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scrip
 bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) spec-driven /path/to/project
 ```
 
-### Switch to a different agent
+### Layer multiple setups
 
-Simply run the installer again with a different agent name - it will replace the existing agent configuration:
+Install multiple setups in the same project (files won't be overwritten):
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) tdd
+# Install spec-driven first
+bash scripts/setup.sh spec-driven
+
+# Add tdd setup (keeps existing files, adds new ones)
+bash scripts/setup.sh tdd
+```
+
+### Update a setup
+
+Simply run the installer again with the same setup name - it will add any new files but preserve your existing ones:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) spec-driven
 ```
 
 ## Troubleshooting

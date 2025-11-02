@@ -81,13 +81,51 @@ Each feature creates a structured task directory:
 
 ## Installation
 
-Use the setup script to install OpenCode configuration into your project:
+### Quick Install (One-Line Command)
+
+Install a setup directly into your project:
 
 ```bash
-./scripts/setup.sh [target-directory]
+bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) <setup-name> [target-path]
 ```
 
-This copies the `.opencode` directory with agent configurations to your project.
+Available setups:
+
+- **spec-driven**: Full specification-driven development workflow
+- **tdd**: Test-driven development workflow with testing context
+
+Example:
+
+```bash
+# Install spec-driven setup in current directory
+bash <(curl -fsSL https://raw.githubusercontent.com/vdespeisse/agents/main/scripts/install.sh) spec-driven
+```
+
+### Manual Installation
+
+If you have cloned this repository:
+
+```bash
+# Install spec-driven setup
+./scripts/setup.sh spec-driven [target-directory]
+
+# Install tdd setup
+./scripts/setup.sh tdd [target-directory]
+```
+
+This copies the selected setup's contents (agents, context files, etc.) to your project's `.opencode` directory.
+
+### Multiple Setups
+
+You can layer multiple setups in the same project - existing files won't be overwritten:
+
+```bash
+# Install spec-driven first
+./scripts/setup.sh spec-driven
+
+# Add tdd setup (preserves existing files, adds new ones)
+./scripts/setup.sh tdd
+```
 
 ## Features
 
