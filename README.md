@@ -10,7 +10,9 @@ This repository provides a structured workflow system that coordinates specializ
 
 ### Agent System
 
-The system consists of five specialized agents:
+The system consists of multiple specialized agents organized into setups:
+
+#### Spec-Driven Setup (Multi-Agent Workflow)
 
 1. **Spec-Driven Agent** (Primary)
    - Analyzes user requests and creates task plans
@@ -38,6 +40,33 @@ The system consists of five specialized agents:
    - Performs security audits
    - Assesses code quality and maintainability
    - Validates spec compliance and patterns
+
+#### TDD Setup (Test-First Workflow)
+
+1. **TDD Orchestrator** (Primary)
+   - Breaks tasks into minimal TDD cycles
+   - Coordinates test-first development
+   - Ensures Red-Green-Refactor workflow
+
+2. **TDD Tester Subagent**
+   - Writes focused unit tests (Vitest)
+   - Creates failing tests first (Red phase)
+
+3. **TDD Coder Subagent**
+   - Implements minimal code to pass tests (Green phase)
+   - Runs tests and verifies all pass
+   - Refactors while keeping tests green
+
+#### Nuxt UI Agent (Single-Agent UI Specialist)
+
+**Nuxt UI Agent** (Primary)
+
+- Focuses exclusively on UI/UX work
+- Applies Tailwind CSS utility classes
+- Selects and configures Nuxt/UI components
+- Creates responsive layouts
+- Runs tests after logic changes
+- Verifies changes visually using chrome-devtools
 
 ## Workflow
 
@@ -93,6 +122,7 @@ Available setups:
 
 - **spec-driven**: Full specification-driven development workflow
 - **tdd**: Test-driven development workflow with testing context
+- **nuxt-ui**: UI-focused agent for Nuxt/UI components and Tailwind CSS
 
 Example:
 
